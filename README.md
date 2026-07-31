@@ -1,81 +1,107 @@
-# WebApp boilerplate with React JS and Flask API
+# El Rincón del Vino
 
-Build web applications using React.js for the front end and python/flask for your backend API.
+E-commerce full stack de vinos desarrollado con React, Flask y PostgreSQL. Permite explorar un catálogo, buscar y filtrar productos, registrarse, iniciar sesión y gestionar un carrito persistente.
 
-- Documentation can be found here: https://start.4geeksacademy.com/starters/react-flask
-- Here is a video on [how to use this template](https://www.loom.com/share/f37c6838b3f1496c95111e515e83dd9b)
-- Integrated with Pipenv for package managing.
-- Fast deployment to heroku [in just a few steps here](https://start.4geeksacademy.com/backend/deploy-heroku-posgres).
-- Use of .env file.
-- SQLAlchemy integration for database abstraction.
+> El proyecto nació como trabajo final de un equipo de cuatro estudiantes en el bootcamp de 4Geeks Academy. Actualmente es mantenido y evolucionado de manera individual por [Jorge Oteiza](https://github.com/JorgeOteiza), responsable de su estabilización, seguridad, documentación y preparación para portafolio.
 
-### 1) Installation:
+## Funciones actuales
 
-> If you use Github Codespaces (recommended) or Gitpod this template will already come with Python, Node and the Posgres Database installed. If you are working locally make sure to install Python 3.10, Node 
+- Catálogo de vinos por tipo y categoría.
+- Búsqueda y detalle de productos.
+- Registro e inicio de sesión con contraseñas hasheadas.
+- Autenticación mediante JWT y rutas privadas.
+- Carrito persistente en `localStorage`.
+- Perfil y eliminación protegida de cuenta.
+- API REST con Flask y SQLAlchemy.
+- Base PostgreSQL con migraciones Alembic.
+- Checkout demostrativo. No procesa pagos reales.
 
-It is recomended to install the backend first, make sure you have Python 3.8, Pipenv and a database engine (Posgress recomended)
+Favoritos, recuperación de contraseña e historial completo continúan en proceso de renovación y no deben considerarse funciones terminadas.
 
-1. Install the python packages: `$ pipenv install`
-2. Create a .env file based on the .env.example: `$ cp .env.example .env`
-3. Install your database engine and create your database, depending on your database you have to create a DATABASE_URL variable with one of the possible values, make sure you replace the valudes with your database information:
+## Tecnologías
 
-| Engine    | DATABASE_URL                                        |
-| --------- | --------------------------------------------------- |
-| SQLite    | sqlite:////test.db                                  |
-| MySQL     | mysql://username:password@localhost:port/example    |
-| Postgress | postgres://username:password@localhost:5432/example |
+- Frontend: React 18, React Router, Context API, Bootstrap y Webpack.
+- Backend: Python 3.12, Flask, Flask-JWT-Extended y SQLAlchemy.
+- Datos: PostgreSQL y Flask-Migrate/Alembic.
+- Herramientas: Pipenv, npm y Git.
 
-4. Migrate the migrations: `$ pipenv run migrate` (skip if you have not made changes to the models on the `./src/api/models.py`)
-5. Run the migrations: `$ pipenv run upgrade`
-6. Run the application: `$ pipenv run start`
+## Ejecución local
 
-> Note: Codespaces users can connect to psql by typing: `psql -h localhost -U gitpod example`
+### Requisitos
 
-### Undo a migration
+- Python 3.12
+- Pipenv
+- Node.js
+- PostgreSQL 16 o una base PostgreSQL compatible
 
-You are also able to undo a migration by running
+### 1. Configuración
 
-```sh
-$ pipenv run downgrade
+Clona el repositorio y crea el archivo local de entorno:
+
+```bash
+cp .env.example .env
 ```
 
-### Backend Populate Table Users
+Edita como mínimo:
 
-To insert test users in the database execute the following command:
-
-```sh
-$ flask insert-test-users 5
+```env
+SECRET_KEY=una-clave-local-larga-y-aleatoria
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/rincon_del_vino
 ```
 
-And you will see the following message:
+El archivo `.env` contiene credenciales locales y está excluido de Git.
 
+### 2. Backend
+
+```bash
+pipenv install
+pipenv run upgrade
+pipenv run insert-test-data
+pipenv run dev
 ```
-  Creating test users
-  test_user1@test.com created.
-  test_user2@test.com created.
-  test_user3@test.com created.
-  test_user4@test.com created.
-  test_user5@test.com created.
-  Users created successfully!
+
+La API queda disponible en `http://127.0.0.1:3001`.
+
+### 3. Frontend
+
+En otra terminal:
+
+```bash
+npm ci --legacy-peer-deps
+npm run dev
 ```
 
-### **Important note for the database and the data inside it**
+La aplicación queda disponible en `http://localhost:3000`.
 
-Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
+## Comandos útiles
 
-### Front-End Manual Installation:
+```bash
+pipenv run dev               # Backend con depuración
+pipenv run upgrade           # Aplicar migraciones
+pipenv run insert-test-data  # Crear catálogo demo de forma idempotente
+npm run dev                  # Frontend de desarrollo
+npm run build                # Build de producción
+```
 
--   Make sure you are using node version 14+ and that you have already successfully installed and runned the backend.
+## Arquitectura
 
-1. Install the packages: `$ npm install`
-2. Start coding! start the webpack dev server `$ npm run start`
+```text
+React + Context API + localStorage
+                |
+                | JSON / HTTP
+                v
+        API REST con Flask
+                |
+                v
+      SQLAlchemy + PostgreSQL
+```
 
-## Publish your website!
+El frontend centraliza las peticiones en `src/front/js/services/api.js`. El backend expone sus rutas bajo `/api`, identifica al usuario mediante JWT y persiste la información con SQLAlchemy.
 
-This boilerplate it's 100% read to deploy with Render.com and Heroku in a matter of minutes. Please read the [official documentation about it](https://start.4geeksacademy.com/deploy).
+## Estado del proyecto
 
-### Contributors
+El proyecto está en modernización activa para convertirse en una demostración profesional de desarrollo full stack. Las prioridades actuales son completar los flujos de usuario, añadir pruebas automatizadas, mejorar accesibilidad y optimizar los recursos visuales.
 
-This template was built as part of the 4Geeks Academy [Coding Bootcamp](https://4geeksacademy.com/us/coding-bootcamp) by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Find out more about our [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), and [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
+## Autoría y evolución
 
-You can find other templates and resources like this at the [school github page](https://github.com/4geeksacademy/).
+La primera versión fue desarrollada colaborativamente durante el bootcamp por Natalia, Matías, Jorge y Demian. La etapa actual de mantenimiento, refactorización y preparación para portafolio es liderada individualmente por Jorge Oteiza.

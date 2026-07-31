@@ -1,6 +1,7 @@
 
 import click
-from api.models import db, User
+from werkzeug.security import generate_password_hash
+from api.models import db, User, Producto
 
 """
 In this file, you can add as many commands as you want using the @app.cli.command decorator
@@ -17,18 +18,60 @@ def setup_commands(app):
     @app.cli.command("insert-test-users") # name of our command
     @click.argument("count") # argument of out command
     def insert_test_users(count):
-        print("Creating test users")
+        print("Creando usuarios de prueba")
         for x in range(1, int(count) + 1):
-            user = User()
-            user.email = "test_user" + str(x) + "@test.com"
-            user.password = "123456"
-            user.is_active = True
+            email = f"test_user{x}@test.com"
+            if User.query.filter_by(email=email).first():
+                continue
+            user = User(
+                username=f"Usuario demo {x}",
+                email=email,
+                password=generate_password_hash("Demo1234"),
+                active=True,
+            )
             db.session.add(user)
-            db.session.commit()
-            print("User: ", user.email, " created.")
 
-        print("All test users created")
+        db.session.commit()
+        print("Usuarios de prueba listos")
 
     @app.cli.command("insert-test-data")
     def insert_test_data():
-        pass
+        products = [
+            ("Cordillera Cabernet Sauvignon", "reserva", "tinto", 8990),
+            ("Valle Central Carménère", "reserva", "tinto", 9490),
+            ("Altos del Maipo Merlot", "gran reserva", "tinto", 12990),
+            ("Costa Fría Pinot Noir", "gran reserva", "tinto", 14990),
+            ("Brisa del Valle Sauvignon Blanc", "reserva", "blanco", 7990),
+            ("Luz de Casablanca Chardonnay", "gran reserva", "blanco", 11990),
+            ("Jardín Austral Rosé", "reserva", "rosé", 8490),
+            ("Atardecer del Pacífico Rosé", "gran reserva", "rosé", 10990),
+            ("Estrellas del Sur Brut", "reserva", "espumante", 9990),
+            ("Cumbre Andina Extra Brut", "gran reserva", "espumante", 13990),
+            ("Viñedo Antiguo Syrah", "reserva", "tinto", 9290),
+            ("Terrazas del Itata País", "gran reserva", "tinto", 12490),
+        ]
+
+        created = 0
+        for name, category, wine_type, price in products:
+            existing_product = Producto.query.filter_by(nombre=name).first()
+            if existing_product:
+                existing_product.categoria = category
+                existing_product.tipo = wine_type
+                existing_product.unitFormat = "Botella 750 ml"
+                existing_product.precio = price
+                existing_product.active = True
+                existing_product.image = "/producto-vino-demo.webp"
+                continue
+            db.session.add(Producto(
+                nombre=name,
+                categoria=category,
+                tipo=wine_type,
+                unitFormat="Botella 750 ml",
+                precio=price,
+                active=True,
+                image="/producto-vino-demo.webp",
+            ))
+            created += 1
+
+        db.session.commit()
+        click.echo(f"Catálogo listo: {created} productos creados, {len(products) - created} ya existían.")

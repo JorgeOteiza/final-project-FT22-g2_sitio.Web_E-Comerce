@@ -10,7 +10,6 @@ flask = "*"
 sqlalchemy = "==1.4.46"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
-flask-swagger = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 flask-cors = "*"
@@ -22,7 +21,7 @@ flask-mail = "*"
 flask-jwt-extended = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.12"
 
 [scripts]
 start="flask run -p 3001 -h 0.0.0.0"
