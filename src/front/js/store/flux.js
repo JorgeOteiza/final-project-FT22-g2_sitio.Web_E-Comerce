@@ -1,3 +1,5 @@
+import { apiFetch } from "../services/api";
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -40,15 +42,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 				};
 				try {
-					const result = await fetch("https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/users", opts)
-					console.log(result)
-				} catch {
-					console.log("Error de registro [flux]", error)
+					return await apiFetch("/users", opts);
+				} catch (error) {
+					throw error;
 				}
 			},
 
 			login: async (email, password) => {
-				console.log(email, password);
 				const opts = {
 					method: "POST",
 					headers: {
@@ -59,34 +59,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 						"password": password,
 					}),
 				};
-				const res = await fetch("https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/login", opts);
-				if (res.status < 200 || res.status >= 300) {
-					throw new Error("There was an error signing in");
-				}
-				const data = await res.json();
+				const data = await apiFetch("/login", opts);
 
 				localStorage.setItem("token", data.token);
 				localStorage.setItem("user_id", data.user_id);
 
-				console.log("USER INFO HERE", data)
-
 				return true;
 			},
-			processPayment: async (user_id, product_id) => {
+			processPayment: async (_user_id, product_id) => {
 				try {
-				  const response = await fetch('https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/historial-compra', {
+				  await apiFetch("/historial-compra", {
 					method: 'POST',
-					headers: {
-					  'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ user_id, producto_id: product_id }),
+					body: JSON.stringify({ producto_id: product_id }),
 				  });
-		
-				  if (response.ok) {
-					console.log('Pago exitoso');
-				  } else {
-					console.error('Pago fallido');
-				  }
 				} catch (error) {
 				  console.error('Error procesando pago', error);
 				}
@@ -94,8 +79,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//fetch de productos para la busqueda
 			getProduct: () => {
 
-				fetch("https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos"
-				).then(resp => resp.json())
+				apiFetch("/productos")
 					.then(data => {
 						setStore({ productos: data });
 
@@ -125,7 +109,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				actions.setShoppingCart(updatedShoppingCart);
 			},
 			fetchProduct: async (id) => {
-				const product = await fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos/${id}`).then(res => res.json())
+				const product = await apiFetch(`/productos/${id}`)
 				setStore({
 					...getStore(),
 					product

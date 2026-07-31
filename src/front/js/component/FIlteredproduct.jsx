@@ -3,6 +3,7 @@ import "../../styles/filter.css";
 import { Card } from "./Card.jsx";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../services/api";
 const Filteredproduct = () => {
     
     const [searchParams, setSearchParams] = useSearchParams();
@@ -13,8 +14,7 @@ const Filteredproduct = () => {
     useEffect(() => {
         setSearchParams({ q: busqueda });
 
-        fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos/${busqueda}`)
-            .then((response) => response.json())
+        apiFetch(`/productos/${encodeURIComponent(busqueda)}`)
             .then((data) => setProductos(data))
             .catch((error) => console.error("Error fetching data:", error));
     }, [busqueda, setSearchParams]);

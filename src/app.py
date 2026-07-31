@@ -3,9 +3,9 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import datetime
 import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
-from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
 from api.models import db, User, Profile, Producto, Factura, FacturaProducto, Orden, OrdenProducto, Favorito
 from api.routes import api
@@ -15,17 +15,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from flask_cors import CORS
 
+load_dotenv()
+
 # from models import Person
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../public/')
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'development-only-secret')
 jwt = JWTManager(app)
 
 
 
-CORS(app, resources={r"/api/": {"origins": "https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/", "methods": ["GET", "POST", "PUT", "DELETE"]}})
+allowed_origins = os.getenv('FRONTEND_URL', 'http://localhost:3000').split(',')
+CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 app.url_map.strict_slashes = False
 
 # database condiguration

@@ -4,6 +4,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
 module.exports = {
+  cache: {
+    type: 'filesystem'
+  },
   entry: [
     './src/front/js/index.js'
   ],
@@ -43,6 +46,6 @@ module.exports = {
         favicon: '4geeks.ico',
         template: 'template.html'
     }),
-    new Dotenv({ safe: true, systemvars: true })
+    new Dotenv({ safe: './.env.frontend.example', systemvars: true })
   ]
 };

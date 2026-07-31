@@ -51,7 +51,7 @@ class User(db.Model):
             "email": self.email,
             "active": self.active,
             "last_login": self.last_login,
-            "favoritos": self.favoritos.serialize()
+            "favoritos": [favorito.serialize() for favorito in self.favoritos]
         }
 
     def serialize_with_facturas(self):
@@ -61,7 +61,7 @@ class User(db.Model):
             "email": self.email,
             "active": self.active,
             "last_login": self.last_login,
-            "facturas": self.facturas.serialize()
+            "facturas": [factura.serialize() for factura in self.facturas]
         }
 
     def serialize_with_ordenes(self):
@@ -71,7 +71,7 @@ class User(db.Model):
             "email": self.email,
             "active": self.active,
             "last_login": self.last_login,
-            "ordenes": self.ordenes.serialize()
+            "ordenes": [orden.serialize() for orden in self.ordenes]
         }
     
     def serialize_with_historialCompra(self):
@@ -81,7 +81,7 @@ class User(db.Model):
             "email": self.email,
             "active": self.active,
             "last_login": self.last_login,
-            "historialCompra": self.historialCompra.serialize()
+            "historialCompra": [item.serialize() for item in self.historialCompra]
         }
 
     def save(self):
@@ -207,7 +207,7 @@ class Orden(db.Model):
             "fecha": self.fecha,
             "total": self.total,
             "status": self.status,
-            "factura": self.factura
+            "factura": self.factura.serialize() if self.factura else None
         }
 
     def save(self):
@@ -259,7 +259,7 @@ class Producto(db.Model):
             "precio": self.precio,
             "active": self.active,
             "image": self.image,
-            "favoritos": self.favoritos.serialize()
+            "favoritos": [favorito.serialize() for favorito in self.favoritos]
         }
 
     def serialize_with_ordenesProductos(self):
@@ -272,7 +272,7 @@ class Producto(db.Model):
             "precio": self.precio,
             "active": self.active,
             "image": self.image,
-            "ordenesProductos": self.ordenesProductos.serialize()
+            "ordenesProductos": [item.serialize() for item in self.ordenesProductos]
         }
 
     def serialize_with_facturasProductos(self):
@@ -285,7 +285,7 @@ class Producto(db.Model):
             "precio": self.precio,
             "active": self.active,
             "image": self.image,
-            "facturasProductos": self.facturasProductos.serialize()
+            "facturasProductos": [item.serialize() for item in self.facturasProductos]
         }
     def serialize_with_historialCompra(self):
         return {
@@ -297,7 +297,7 @@ class Producto(db.Model):
             "precio": self.precio,
             "active": self.active,
             "image": self.image,
-            "historialCompra": self.historialCompra.serialize()
+            "historialCompra": [item.serialize() for item in self.historialCompra]
         }
 
     def save(self):
@@ -323,8 +323,8 @@ class OrdenProducto(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "cantidad": self.nombre,
-            "precio": self.categoria,
+            "cantidad": self.cantidad,
+            "precio": self.precio,
         }
 
     def save(self):
@@ -350,8 +350,8 @@ class FacturaProducto(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "cantidad": self.nombre,
-            "precio": self.categoria,
+            "cantidad": self.cantidad,
+            "precio": self.precio,
         }
 
     def save(self):

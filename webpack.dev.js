@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
@@ -20,7 +19,7 @@ if (process.env.CODESPACE_NAME) {
 
 module.exports = merge(common, {
   mode: 'development',
-  devtool: 'cheap-module-source-map',
+  devtool: 'eval-cheap-module-source-map',
   devServer: {
     port,
     hot: true,
@@ -47,6 +46,5 @@ module.exports = merge(common, {
     //     semi: true,                 // Print semicolons at the ends of statements.
     //     encoding: 'utf-8'           // Which encoding scheme to use on files
     // }),
-    new webpack.HotModuleReplacementPlugin()
   ]
 });

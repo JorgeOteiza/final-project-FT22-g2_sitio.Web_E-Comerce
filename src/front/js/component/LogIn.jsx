@@ -13,32 +13,26 @@ const LogIn = () => {
 
     const token = localStorage.getItem("token");
 
-    const handleLogin = (e) => {
-        e.preventDefault()
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-        actions.login(email, password)
-            .then((res) => { navigate("/") })
-
-        setTimeout(() => {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Datos erróneos o usuario inexiste!",
-                });
-                setEmail("")
-                setPassword("")
-            } else {
-                Swal.fire({
-                    icon: "success",
-                    title: "Has accedido correctamente!"
-                });
-                setTimeout(() => {
-                    window.location.reload(false)
-                }, 1500);
-            }
-        }, 2000);
+        try {
+            await actions.login(email, password);
+            await Swal.fire({
+                icon: "success",
+                title: "Has accedido correctamente!",
+                timer: 1200,
+                showConfirmButton: false
+            });
+            navigate("/");
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "No se pudo iniciar sesión",
+                text: error.message,
+            });
+            setPassword("");
+        }
     };
 
     return (

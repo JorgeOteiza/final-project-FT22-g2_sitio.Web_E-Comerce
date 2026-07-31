@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import usuarioFoto from "../../img/usuarioFoto.png";
 import ModalCerrarSesion from "../component/ModalCerrarSesion.jsx";
@@ -6,11 +6,22 @@ import ModalEliminarCuenta from "../component/ModalEliminarCuenta.jsx";
 import { Link } from "react-router-dom";
 import "../../styles/perfilUsuario.css";
 import { Context } from "../store/appContext";
+import { apiFetch } from "../services/api";
 
 
 const PerfilUsuario = () => {
 
   const { store, actions } = useContext(Context)
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      apiFetch(`/users/${userId}`)
+        .then(setUser)
+        .catch(() => setUser(null));
+    }
+  }, []);
 
   const handleEliminarCuenta = async () => {
 
@@ -26,13 +37,9 @@ const PerfilUsuario = () => {
           const userId = localStorage.getItem("user_id");
           console.log(userId)
 
-          const response = await fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/users/${userId}`, {
+          await apiFetch(`/users/${userId}`, {
             method: "DELETE"
           });
-
-          if (!response.ok) {
-            throw new Error("No se pudo eliminar el usuario");
-          }
 
           Swal.fire(
             "Eliminado!",
@@ -84,7 +91,7 @@ const PerfilUsuario = () => {
                 <img src={usuarioFoto} alt="usuario foto" className="usuarioFoto" />
               </div>
               <div className="user-name text-center">
-                <h2 className="name">Batman</h2>
+                <h2 className="name">{user?.username || "Mi perfil"}</h2>
               </div>
 
               <div className="profile-usermenu">

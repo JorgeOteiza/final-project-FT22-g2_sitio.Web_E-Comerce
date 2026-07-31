@@ -6,39 +6,45 @@ from api.models import db, User, Producto, HistorialCompra
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-from flask_cors import CORS
+from sqlalchemy.exc import IntegrityError
 # from email import sendMail
 
 api = Blueprint('api', __name__)
-CORS(api, resources={r"/api/": {"origins": "https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/", "methods": ["GET", "POST", "PUT", "DELETE"]}})
-
-# Allow CORS requests to this API
-CORS(api)
 
 # Rutas para la tabla User
-@api.route('/users', methods=['GET', 'POST'])
+@api.route('/users', methods=['POST'])
 def manage_users():
-    if request.method == 'GET':
-        users = User.query.all()
-        return jsonify([user.username for user in users])
-    elif request.method == 'POST':
-        data = request.json
-        user = User(username=data['username'], email=data['email'], 
-                        active=data['active'], password=generate_password_hash(data['password']))
+    data = request.get_json(silent=True) or {}
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+
+    if not username or not email or len(password) < 8:
+        return jsonify({
+            'message': 'Usuario, email y una contraseña de al menos 8 caracteres son obligatorios'
+        }), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({'message': 'Ya existe una cuenta con ese email'}), 409
+
+    try:
+        user = User(
+            username=username,
+            email=email,
+            active=True,
+            password=generate_password_hash(password)
+        )
         db.session.add(user)
         db.session.commit()
         return jsonify({'message': 'Usuario creado exitosamente'}), 201
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'message': 'No se pudo crear el usuario'}), 409
 
-@api.route('/login', methods=['POST', 'GET'])
+@api.route('/login', methods=['POST'])
 def login():
-    if request.method == 'GET':
-        users = User.query.all()
-        return jsonify([user.username for user in users])
-    elif request.method == 'POST':
-        data = request.json
-        print(data)
-        email = data.get('email')
-        password = data.get('password')
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
 
     if not email or not password:
         return jsonify({'message': 'Email and password are required'}), 400
@@ -47,7 +53,7 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({'message': 'Invalid email or password'}), 401
     
-    token = create_access_token(identity={'email': user.email})
+    token = create_access_token(identity=str(user.id))
     return jsonify({'token': token, 'user_id': user.id, 'message': 'Login successful'}), 200
 
 # RUTA LISTA
@@ -88,7 +94,11 @@ def get_all_products_by_category(categoria):
 
 # RUTA LISTA
 @api.route('/users/<int:user_id>', methods=['GET', 'DELETE'])
+@jwt_required()
 def user_detail(user_id):
+    if int(get_jwt_identity()) != user_id:
+        return jsonify({'message': 'No tienes permiso para acceder a esta cuenta'}), 403
+
     user = User.query.get_or_404(user_id)
     if request.method == 'GET':
         return jsonify({'username': user.username, 'email': user.email, 'active': user.active})
@@ -113,14 +123,20 @@ def get_products_by_search(busqueda):
 
 # RUTA LISTA
 @api.route('/historial-compra', methods=['GET', 'POST'])
+@jwt_required()
 def get_historial():
-    if request.method == 'POST':
-        data = request.json
-        producto_id = data.get('producto_id')
-        user_id = data.get('user_id')
+    user_id = int(get_jwt_identity())
+    if User.query.get(user_id) is None:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
 
-        if not producto_id or not user_id:
-            return jsonify({'message': 'Both producto_id and user_id are required'}), 400
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        producto_id = data.get('producto_id')
+
+        if not producto_id:
+            return jsonify({'message': 'producto_id is required'}), 400
+        if Producto.query.get(producto_id) is None:
+            return jsonify({'message': 'Producto no encontrado'}), 404
 
         historial_compra = HistorialCompra(producto_id=producto_id, user_id=user_id)
         historial_compra.save()
@@ -128,11 +144,8 @@ def get_historial():
         return jsonify({'message': 'HistorialCompra created successfully'}), 201
 
     elif request.method == 'GET':
-        historial_compras = HistorialCompra.query.all()
+        historial_compras = HistorialCompra.query.filter_by(user_id=user_id).all()
         return jsonify([historial.serialize() for historial in historial_compras])
-    
-    historial_compras = HistorialCompra.query.all()
-    return jsonify([HistorialCompra.serialize() for HistorialCompra in historial_compras])
     
 @api.route('/reset_password', methods=['POST', 'GET', 'PUT'])
 def reset_password():

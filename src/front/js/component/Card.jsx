@@ -2,6 +2,7 @@ import { auto } from "@cloudinary/url-gen/qualifiers/quality";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "/src/front/styles/index.css";
+import { apiFetch } from "../services/api";
 
 function handleResetCategories() {
   setTimeout(() => {
@@ -53,8 +54,7 @@ const CardContainer4 = () => {
   const cantidadVisible = 4;
 
   useEffect(() => {
-    fetch("https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos")
-      .then((response) => response.json())
+    apiFetch("/productos")
       .then((data) => setProductos(data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -67,8 +67,7 @@ const CardContainer16 = ({ tipo }) => {
   const [cantidadVisible, setCantidadVisible] = useState(16);
 
   useEffect(() => {
-    fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos/tipo/${tipo}`)
-      .then((response) => response.json())
+    apiFetch(`/productos/tipo/${tipo}`)
       .then((data) => setProductos(data))
       .catch((error) => console.error("Error fetching data:", error));
     console.log("Error en el card16, tipo de vino", tipo)
@@ -97,8 +96,7 @@ const CardFilterCategoria = ({ categoria }) => {
   const [cantidadVisible, setCantidadVisible] = useState(16);
 
   useEffect(() => {
-    fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/productos/categoria/${categoria}`)
-      .then((response) => response.json())
+    apiFetch(`/productos/categoria/${categoria}`)
       .then((data) => setProductos(data))
       .catch((error) => console.error("Error fetching data:", error));
     console.log("Error en el card16, productos", categoria)
