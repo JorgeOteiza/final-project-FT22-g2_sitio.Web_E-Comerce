@@ -229,6 +229,11 @@ class Producto(db.Model):
     tipo = db.Column(db.String(120), nullable=False)
     unitFormat = db.Column(db.String(120), nullable=False)
     precio = db.Column(db.Integer, nullable=False)
+    precio_oferta = db.Column(db.Integer)
+    marca = db.Column(db.String(160), nullable=False, default="")
+    cepa = db.Column(db.String(200), nullable=False, default="")
+    descripcion = db.Column(db.Text, nullable=False, default="")
+    stock = db.Column(db.Integer, nullable=False, default=0)
     active = db.Column(db.Boolean(), nullable=False)
     image = db.Column(db.String(200), nullable=False)
     # Conexiones
@@ -245,6 +250,11 @@ class Producto(db.Model):
             "tipo": self.tipo,
             "unitFormat": self.unitFormat,
             "precio": self.precio,
+            "precio_oferta": self.precio_oferta,
+            "marca": self.marca,
+            "cepa": self.cepa,
+            "descripcion": self.descripcion,
+            "stock": self.stock,
             "active": self.active,
             "image": self.image,
         }

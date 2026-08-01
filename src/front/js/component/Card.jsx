@@ -1,8 +1,13 @@
-import { auto } from "@cloudinary/url-gen/qualifiers/quality";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "/src/front/styles/index.css";
 import { apiFetch } from "../services/api";
+
+const formatPrice = (price) => new Intl.NumberFormat("es-CL", {
+  style: "currency",
+  currency: "CLP",
+  maximumFractionDigits: 0,
+}).format(price);
 
 function handleResetCategories() {
   setTimeout(() => {
@@ -16,19 +21,31 @@ const Card = ({ productos }) => (
       <div key={producto.id} className="col-12 col-md-6 col-lg-3">
         <div className="my-5 d-flex justify-content-center " >
           <div className="card-product bg-light text-center" style={{ width: "100%", maxWidth: "300px", minHeight: "625px" }} >
-            <div className="m-5">
+            <div className="m-4 position-relative catalog-product-image-frame">
+              {producto.precio_oferta && (
+                <span className="badge bg-danger position-absolute top-0 start-0">Oferta</span>
+              )}
               <img
-                className="card-img-top img-fluid"
+                className="card-img-top img-fluid catalog-product-image"
                 src={`${producto.image}`}
                 alt={`${producto.nombre}`}
-                style={{ maxHeight: "280px" }}
               />
             </div>
             <div className="card-body text-align-center" style={{ overflow: "hidden" }}>
               <h4 className="card-title custom-text-card" title={`${producto.nombre}`}>
                 {producto.nombre.length > 19 ? `${producto.nombre.substring(0, 19)}...` : producto.nombre}
               </h4>
-              <h5>${`${producto.precio}`}</h5>
+              <p className="text-secondary mb-1">{producto.marca}</p>
+              {producto.precio_oferta ? (
+                <div>
+                  <span className="text-secondary text-decoration-line-through me-2">
+                    {formatPrice(producto.precio)}
+                  </span>
+                  <strong className="text-danger h5">{formatPrice(producto.precio_oferta)}</strong>
+                </div>
+              ) : (
+                <h5>{formatPrice(producto.precio)}</h5>
+              )}
               <p className="card-text text-align-center">
                 <i className="fa-solid fa-star stars"></i>
                 <i className="fa-solid fa-star stars"></i>

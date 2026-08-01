@@ -14,13 +14,17 @@ import { Link } from "react-router-dom";
 
 const Single = () => {
   const { store, actions } = useContext(Context);
-  const { nombre = "", precio, image, stars, unitFormat, tipo } = store.product || {};
+  const {
+    nombre = "", precio = 0, precio_oferta, image, stars, unitFormat, tipo,
+    marca, cepa, categoria, descripcion, stock = 0,
+  } = store.product || {};
+  const precioUnitario = precio_oferta || precio;
 
   const token = localStorage.getItem("token");
 
   const [favorito, setFavorito] = useState(false);
   const [cantidad, setCantidad] = useState(1)
-  const [precioTotal, setPrecioTotal] = useState(precio || 0)
+  const [precioTotal, setPrecioTotal] = useState(precioUnitario)
 
   const handleAddFavorites = () => {
     setFavorito(!favorito);
@@ -36,7 +40,7 @@ const Single = () => {
       // Agregar nuevo item con cantidad seteada
       actions.setShoppingCart([...store.shoppingCart, {
         nombre,
-        precio,
+        precio: precioUnitario,
         image,
         stars,
         unitFormat,
@@ -48,7 +52,7 @@ const Single = () => {
 
   const handleSumar = () => {
     setCantidad(cantidad + 1);
-    setPrecioTotal(precio * (cantidad + 1))
+    setPrecioTotal(precioUnitario * (cantidad + 1))
 
     actions.updateShoppingCart(nombre, cantidad + 1);
   }
@@ -56,7 +60,7 @@ const Single = () => {
   const handleRestar = () => {
     if (cantidad > 1) {
       setCantidad(cantidad - 1);
-      setPrecioTotal(precio * (cantidad - 1))
+      setPrecioTotal(precioUnitario * (cantidad - 1))
 
       actions.updateShoppingCart(nombre, cantidad - 1);
     }
@@ -86,10 +90,12 @@ const Single = () => {
   }, [id])
 
   useEffect(() => {
-    if (precio !== undefined) {
-      setPrecioTotal(precio * cantidad);
-    }
-  }, [cantidad, precio]);
+    setPrecioTotal(precioUnitario * cantidad);
+  }, [cantidad, precioUnitario]);
+
+  const formatPrice = (value) => new Intl.NumberFormat("es-CL", {
+    style: "currency", currency: "CLP", maximumFractionDigits: 0,
+  }).format(value || 0);
 
   const enCarrito = store.shoppingCart?.some(shoppingCartItem => nombre === shoppingCartItem.nombre)
 
@@ -118,6 +124,7 @@ const Single = () => {
                       <i className="fas fa-star stars"></i>
                       <i className="fas fa-star stars"></i>
                     </p>
+                    <p className="text-secondary col-12 mb-1 text-start">{marca}</p>
                     <p className="text-secondary col-12 mb-1 text-start">{unitFormat}</p>
                   </div>
                   <button type="button" className="btn-add-favorites-product" onClick={handleAddFavorites}>
@@ -125,15 +132,25 @@ const Single = () => {
                   </button>
 
                 </div>
-                <p className="text-secondary col-12 mb-3 text-start">Tipo: {tipo}</p>
+                <p className="text-secondary col-12 mb-1 text-start">Tipo: {tipo}</p>
+                <p className="text-secondary col-12 mb-1 text-start">Cepa: {cepa}</p>
+                <p className="text-secondary col-12 mb-1 text-start">Categoría: {categoria}</p>
+                <p className="text-secondary col-12 mb-3 text-start">Stock: {stock} unidades</p>
               </div>
 
             </div>
 
             <div className="section-cantidad-precio-añadir-producto">
-              <p className="price-carrito-hover text-black text-start col-12 mt-5 h5 mb-3 mx-0">
-                Precio: ${precioTotal}
-              </p>
+              <div className="price-carrito-hover text-start col-12 mt-5 mb-3 mx-0">
+                {precio_oferta && cantidad === 1 && (
+                  <span className="text-secondary text-decoration-line-through me-2">
+                    {formatPrice(precio)}
+                  </span>
+                )}
+                <span className={precio_oferta ? "text-danger h4" : "text-black h4"}>
+                  {formatPrice(precioTotal)}
+                </span>
+              </div>
 
               <div className="container-buttons-producto col-12">
                 <div className="row mx-1">
@@ -186,21 +203,7 @@ const Single = () => {
           Descripción del Producto
         </h4>
         <div className="ps-relative">
-          <textarea
-            id="wmd-input"
-            name="post-text"
-            className="wmd-input s-input col-12 bar0 js-post-body-field processed textarea-productCard p-3"
-            data-editor-type="wmd"
-            data-post-type-id="2"
-            cols="92"
-            rows="15"
-            aria-labelledby="your-answer-header"
-            tabIndex="101"
-            data-min-length=""
-            disabled
-            placeholder="- 750cc - 1 unidad"
-          ></textarea>
-          <div className="grippie bbr-sm" style={{ marginRight: "0px" }}></div>
+          <p className="product-description text-start p-4 mb-0">{descripcion}</p>
         </div>
       </div>
 

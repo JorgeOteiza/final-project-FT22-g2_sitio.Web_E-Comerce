@@ -61,18 +61,7 @@ def login():
 def producto_detail(producto_id):
     producto = Producto.query.get_or_404(producto_id)
     if request.method == 'GET':
-        return jsonify(
-            {
-            "id": producto.id,
-            "nombre": producto.nombre,
-            "categoria": producto.categoria,
-            "tipo": producto.tipo,
-            "unitFormat": producto.unitFormat,
-            "precio": producto.precio,
-            "active": producto.active,
-            "image": producto.image,
-             }
-            )
+        return jsonify(producto.serialize())
 
 # RUTA LISTA
 @api.route('/productos', methods=['GET'])
