@@ -30,7 +30,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 			productos: [],
 			productosFiltrados: []
 		},
-		actions: {
+			actions: {
+			checkout: async (items) => {
+				const response = await apiFetch("/checkout", {
+					method: "POST",
+					body: JSON.stringify({
+						items: items.map(item => ({
+							producto_id: item.id,
+							cantidad: item.cantidad,
+						})),
+					}),
+				});
+				getActions().clearShoppingCart();
+				getActions().getProduct();
+				return response.orden;
+			},
 			// Use getActions to call a function within a fuction
 			createUser: async (username, email, password) => {
 				const opts = {

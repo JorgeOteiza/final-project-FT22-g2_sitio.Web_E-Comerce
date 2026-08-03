@@ -1,319 +1,96 @@
-import React, { useContext, useState } from "react"
-import "../../styles/cambiarDireccion.css";
-import Swal from 'sweetalert2';
-import logoElRinconDelVino from "../../img/logoElRinconDelVino.png";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import { Context } from "../store/appContext";
+import { formatPrice } from "./Card.jsx";
+import "../../styles/cambiarDireccion.css";
 
+const initialAddress = {
+  region: "",
+  comuna: "",
+  calle: "",
+  numeroCasa: "",
+  codigoPostal: "",
+  numeroContacto: "",
+};
+
+const regions = [
+  "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo",
+  "Valparaíso", "Metropolitana", "O'Higgins", "Maule", "Ñuble", "Biobío",
+  "La Araucanía", "Los Ríos", "Los Lagos", "Aysén", "Magallanes",
+];
 
 const Direccion = () => {
+  const { store, actions } = useContext(Context);
+  const navigate = useNavigate();
+  const cart = Array.isArray(store.shoppingCart) ? store.shoppingCart : [];
+  const [address, setAddress] = useState(initialAddress);
+  const [submitting, setSubmitting] = useState(false);
+  const total = cart.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
-    const { store, actions } = useContext(Context);
-    const shoppingCart = store.shoppingCart || [];
+  const updateField = event => setAddress(current => ({
+    ...current,
+    [event.target.name]: event.target.value,
+  }));
 
-    const [state, setState] = useState({
-        comuna: "",
-        calle: "",
-        numeroCasa: "",
-        codigoPostal: "",
-        numeroContacto: ""
-    })
-
-    const handleOnClickDefault = (e) => {
-        e.preventDefault();
-
-        const numberOnly = /^\d+$/;
-
-        let isValid = true;
-
-        if (state.comuna === '' || state.calle === '' || state.codigoPostal === '' || state.numeroContacto === '') {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Todos los campos son obligatorios!",
-            });
-        } else {
-
-            if (state.comuna.length < 1 || state.comuna.length > 30) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La comuna debe ser válida!",
-                });
-                isValid = false;
-            }
-
-            if (state.calle.length < 1 || state.calle.length > 30) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La calle debe ser válida!",
-                });
-                isValid = false;
-            }
-
-            // if (!numberOnly.test(state.numeroCasa)) {
-            //     Swal.fire({
-            //         icon: "error",
-            //         title: "Oops...",
-            //         text: "Número puede contener dígitos!",
-            //     });
-            //     isValid = false;
-            // }
-
-            // if (state.numeroCasa.length < 0 || state.numeroCasa.length > 5) {
-            //     Swal.fire({
-            //         icon: "error",
-            //         title: "Oops...",
-            //         text: "Su número de casa debe ser válido!",
-            //     });
-            //     isValid = false;
-            // }
-
-            if (!numberOnly.test(state.codigoPostal)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "El código postal sólo puede contener dígitos!",
-                });
-                isValid = false;
-            }
-
-            // PENDIENTE
-            if (state.codigoPostal.length < 7 || state.codigoPostal.length > 7) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Código postal debe tener 7 dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (!numberOnly.test(state.numeroContacto)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Número de contacto sólo puede contener dígitos!",
-                });
-                isValid = false;
-            }
-
-            // PENDIENTE
-            if (state.numeroContacto.length < 9 || state.numeroContacto.length > 9) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Número de contacto debe tener 9 dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (isValid) {
-                localStorage.removeItem("shoppingCart");
-                let timerInterval;
-                Swal.fire({
-                    icon: "success",
-                    title: "¡Gracias por su compra!",
-                    imageUrl: logoElRinconDelVino,
-                    imageWidth: 250,
-                    imageHeight: 180,
-                    imageAlt: "Custom image",
-                    html: "Será redirigido a la página principal en <b></b> milisegundos.",
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: () => {
-                        Swal.showLoading();
-                        const timer = Swal.getPopup().querySelector("b");
-                        timerInterval = setInterval(() => {
-                            timer.textContent = `${Swal.getTimerLeft()}`;
-                        }, 100);
-                    },
-                    willClose: () => {
-                        clearInterval(timerInterval);
-                    }
-                }).then((result) => {
-                    if (result.dismiss === Swal.DismissReason.timer) {
-                        console.log("I was closed by the timer");
-                        window.location.href = "/";
-                    }
-                });
-            }
-        }
+  const submitCheckout = async event => {
+    event.preventDefault();
+    if (!cart.length) {
+      navigate("/carrito", { replace: true });
+      return;
+    }
+    if (!/^\d{7}$/.test(address.codigoPostal) || !/^\d{9}$/.test(address.numeroContacto)) {
+      Swal.fire({
+        icon: "error",
+        title: "Revisa tus datos",
+        text: "El código postal debe tener 7 dígitos y el teléfono 9 dígitos.",
+        confirmButtonColor: "#7b2121",
+      });
+      return;
     }
 
-    const handleInputChange = (e) => {
-        setState({
-            ...state,
-            [e.target.name]: e.target.value
-        })
+    setSubmitting(true);
+    try {
+      const order = await actions.checkout(cart);
+      navigate("/compra-exitosa", { replace: true, state: { order, address } });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "No pudimos confirmar la compra",
+        text: error.message,
+        confirmButtonColor: "#7b2121",
+      });
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    const handleFocusChange = (e) => {
-        setState({
-            ...state,
-            focus: e.target.name
-        })
-    }
-
-    return (
-        <div className="container mb-5 container-formulario-direccion-pago">
-
-            {/* formulario */}
-            <h4 className="direccion-de-envio pt-4 pb-2 text-center">Dirección de envío:</h4>
-            <div className="card d-flex">
-                <div className="card-body container" style={{ borderRadius: '10px', boxShadow: '0 0 10px #dadada' }}>
-
-                    <form className="needs-validation" novalidate>
-                        <div className="row mb-4">
-                            <div className="col-6">
-                                {/*  Region */}
-                                <label for="formGroupExampleInput" className="form-label">Región</label>
-                                <select type="text" className="form-select" placeholder="Región" aria-label="Región" required>
-                                    <option selected>Selecciona tu región</option>
-                                    <option value="1">Región de Arica y Parinacota</option>
-                                    <option value="2">Región de Tarapacá</option>
-                                    <option value="3">Región de Antofagasta</option>
-                                    <option value="4">Región de Atacama</option>
-                                    <option value="5">Región de Coquimbo</option>
-                                    <option value="6">Región de Valparaíso</option>
-                                    <option value="8">Región Metropolitana</option>
-                                    <option value="9">Región del Libertador General Bernardo O'Higgins</option>
-                                    <option value="10">Región del Maule</option>
-                                    <option value="11">Región de Ñuble</option>
-                                    <option value="12">Región del Biobío</option>
-                                    <option value="13">Región de La Araucanía</option>
-                                    <option value="14">Región de Los Ríos</option>
-                                    <option value="15">Región de Los Lagos</option>
-                                    <option value="16">Región de Aysén del General Carlos Ibáñez del Campo</option>
-                                    <option value="17">Región de Magallanes y de la Antártica Chilena</option>
-                                </select>
-                            </div>
-                            {/* comuna */}
-                            <div className="col-6">
-                                <label for="inputComuna" className="form-label">Comuna</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="comuna"
-                                    placeholder="Comuna"
-                                    aria-label="Comuna"
-                                    id="comuna"
-                                    maxLength={30}
-                                    required
-                                    onChange={handleInputChange}
-                                    onFocus={handleFocusChange}
-                                />
-
-                            </div>
-                            <div className="invalid-feedback" id="comuna"></div>
-                        </div>
-                        <div className="row mb-4">
-                            {/* calle */}
-                            <div className="col-6">
-                                <label for="inputCalle" className="form-label">Dirección</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="calle"
-                                    placeholder="Dirección"
-                                    aria-label="Calle"
-                                    id="calle"
-                                    maxLength={30}
-                                    required
-                                    onChange={handleInputChange}
-                                    onFocus={handleFocusChange}
-                                />
-                                <div className="invalid-feedback" id="calle"></div>
-                            </div>
-                            {/* numero de casa */}
-                            <div className="col-6">
-                                <label for="inputNumero" className="form-label">Piso/departamento</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="numeroCasa"
-                                    placeholder="(Opcional)"
-                                    aria-label="Número de casa"
-                                    maxLength={20}
-                                    id="numero"
-                                    onChange={handleInputChange}
-                                    onFocus={handleFocusChange}
-                                />
-                            </div>
-                            <div className="invalid-feedback" id="numero"></div>
-                        </div>
-                        <div className="row mb-4">
-                            {/* codigo postal */}
-                            <div className="col-6">
-                                <label for="finputCodigoPostal" className="form-label">Código postal</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="codigoPostal"
-                                    placeholder="Código postal"
-                                    aria-label="Código postal"
-                                    maxLength={7}
-                                    required
-                                    onChange={handleInputChange}
-                                    onFocus={handleFocusChange}
-                                />
-                            </div>
-                            {/* Número de contacto */}
-                            <div className="col-6">
-                                <label for="finputTelefono" className="form-label">Número de contacto</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    name="numeroContacto"
-                                    placeholder="N°de contacto"
-                                    aria-label="Número de contacto"
-                                    maxLength={9}
-                                    required
-                                    onChange={handleInputChange}
-                                    onFocus={handleFocusChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="container-checkbox-direccion d-flex justify-content-center">
-
-                            {/* seleccion casa */}
-                            <div className="form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="flexRadioDefault"
-                                    id="flexRadioDefault1"
-                                />
-                                <label className="form-check-label" for="flexRadioDefault1">
-                                    <i className="fa-solid fa-house icono-casa-cambiarDireccion"></i> Casa
-
-                                </label>
-                            </div>
-                            {/* seleccion trabajo */}
-                            <div className="form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="flexRadioDefault"
-                                    id="flexRadioDefault2"
-                                />
-                                <label className="form-check-label" for="flexRadioDefault2">
-                                    <i className="fa-solid fa-briefcase icono-trabajo-cambiarDireccion" ></i> Trabajo
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* BOTON PARA PAGAR */}
-                        <div className="container-boton-para-pagar d-flex justify-content-center">
-                            <button type="submit" className="btn btn-dark btn-lg boton-para-pagar" onClick={handleOnClickDefault}>
-                                Pagar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+  return (
+    <main className="shipping-page">
+      <div className="container shipping-container">
+        <div className="payment-progress" aria-label="Proceso de compra">
+          <span className="complete">Carrito</span><span className="complete">Pago</span><span className="active">3. Envío y confirmación</span>
         </div>
-    )
-}
+        <header className="shipping-header">
+          <span className="wine-eyebrow wine-eyebrow-dark">Último paso</span>
+          <h1>Dirección de envío</h1>
+          <p>Confirma dónde quieres recibir tu selección.</p>
+        </header>
+        <div className="shipping-layout">
+          <form className="shipping-form" onSubmit={submitCheckout}>
+            <label>Región<select name="region" value={address.region} onChange={updateField} required><option value="">Selecciona tu región</option>{regions.map(region => <option key={region}>{region}</option>)}</select></label>
+            <label>Comuna<input name="comuna" value={address.comuna} onChange={updateField} maxLength="30" required /></label>
+            <label className="shipping-wide">Dirección<input name="calle" value={address.calle} onChange={updateField} maxLength="60" required /></label>
+            <label>Piso o departamento <small>(opcional)</small><input name="numeroCasa" value={address.numeroCasa} onChange={updateField} maxLength="20" /></label>
+            <label>Código postal<input name="codigoPostal" inputMode="numeric" value={address.codigoPostal} onChange={updateField} maxLength="7" required /></label>
+            <label>Teléfono<input name="numeroContacto" inputMode="numeric" value={address.numeroContacto} onChange={updateField} maxLength="9" required /></label>
+            <button className="wine-button wine-button-primary shipping-submit" type="submit" disabled={submitting}>{submitting ? "Confirmando compra…" : `Confirmar compra por ${formatPrice(total)}`}</button>
+          </form>
+          <aside className="shipping-summary"><h2>Tu pedido</h2>{cart.map(item => <div key={item.id}><span>{item.cantidad} × {item.nombre}</span><strong>{formatPrice(item.precio * item.cantidad)}</strong></div>)}<div className="shipping-total"><span>Total</span><strong>{formatPrice(total)}</strong></div><p><i className="fa-solid fa-lock" /> Pago simulado. No almacenamos datos bancarios.</p></aside>
+        </div>
+      </div>
+    </main>
+  );
+};
 
 export default Direccion;

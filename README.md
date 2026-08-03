@@ -15,7 +15,7 @@ E-commerce full stack de vinos desarrollado con React, Flask y PostgreSQL. Inclu
 - Perfil e historial de compras.
 - API REST construida con Flask y SQLAlchemy.
 - Migraciones de base de datos con Alembic.
-- Checkout demostrativo que no procesa pagos reales.
+- Checkout transaccional demostrativo: valida inventario, descuenta stock y registra la orden completa.
 - Diseño adaptable, estados de carga y catálogo accesible desde dispositivos móviles.
 
 ## Tecnologías
@@ -99,7 +99,7 @@ El frontend centraliza las peticiones en `src/front/js/services/api.js`. El back
 
 ## Alcance del pago
 
-El checkout es una demostración de interfaz y flujo de compra. No se conecta a Webpay, PayPal ni a otros procesadores, y no debe utilizarse para ingresar datos bancarios reales.
+El checkout valida el carrito en el servidor, calcula los precios vigentes, descuenta stock y registra la orden de forma atómica. Sigue siendo una demostración: no se conecta a Webpay, PayPal ni a otros procesadores, y no debe utilizarse para ingresar datos bancarios reales.
 
 ## Autoría y evolución
 

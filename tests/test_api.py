@@ -14,7 +14,7 @@ os.environ["SECRET_KEY"] = "test-secret-key-with-at-least-32-bytes"
 os.environ["FLASK_DEBUG"] = "0"
 
 from app import app  # noqa: E402
-from api.models import Favorito, Producto, User, db  # noqa: E402
+from api.models import Favorito, HistorialCompra, Orden, OrdenProducto, Producto, User, db  # noqa: E402
 from werkzeug.security import generate_password_hash  # noqa: E402
 
 
@@ -52,9 +52,24 @@ class ApiTestCase(unittest.TestCase):
                 active=True,
                 image="vino-prueba.webp",
             )
-            db.session.add_all([first_user, second_user, product])
+            second_product = Producto(
+                nombre="Segundo vino",
+                categoria="reserva",
+                tipo="blanco",
+                unitFormat="750 ml",
+                precio=8990,
+                precio_oferta=None,
+                marca="Viña de prueba",
+                cepa="Sauvignon Blanc",
+                descripcion="Segundo producto de prueba.",
+                stock=2,
+                active=True,
+                image="segundo-vino.webp",
+            )
+            db.session.add_all([first_user, second_user, product, second_product])
             db.session.commit()
             self.product_id = product.id
+            self.second_product_id = second_product.id
 
     def tearDown(self):
         with app.app_context():
@@ -187,6 +202,69 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(history.status_code, 200)
         self.assertEqual(len(history.get_json()), 1)
         self.assertEqual(history.get_json()[0]["producto"]["id"], self.product_id)
+
+    def test_checkout_requires_authentication_and_items(self):
+        unauthorized = self.client.post("/api/checkout", json={"items": []})
+        empty = self.client.post(
+            "/api/checkout", headers=self.login_headers(), json={"items": []}
+        )
+
+        self.assertEqual(unauthorized.status_code, 401)
+        self.assertEqual(empty.status_code, 400)
+
+    def test_checkout_creates_order_and_decreases_stock(self):
+        response = self.client.post(
+            "/api/checkout",
+            headers=self.login_headers(),
+            json={"items": [
+                {"producto_id": self.product_id, "cantidad": 2},
+                {"producto_id": self.second_product_id, "cantidad": 1},
+            ]},
+        )
+
+        self.assertEqual(response.status_code, 201)
+        order = response.get_json()["orden"]
+        self.assertEqual(order["numero_orden"], "RV-000001")
+        self.assertEqual(order["total"], 15990 * 2 + 8990)
+        self.assertEqual(len(order["productos"]), 2)
+        with app.app_context():
+            self.assertEqual(db.session.get(Producto, self.product_id).stock, 4)
+            self.assertEqual(db.session.get(Producto, self.second_product_id).stock, 1)
+            self.assertEqual(Orden.query.count(), 1)
+            self.assertEqual(OrdenProducto.query.count(), 2)
+            self.assertEqual(HistorialCompra.query.count(), 2)
+
+    def test_checkout_rejects_insufficient_stock_without_partial_changes(self):
+        response = self.client.post(
+            "/api/checkout",
+            headers=self.login_headers(),
+            json={"items": [
+                {"producto_id": self.product_id, "cantidad": 1},
+                {"producto_id": self.second_product_id, "cantidad": 3},
+            ]},
+        )
+
+        self.assertEqual(response.status_code, 409)
+        with app.app_context():
+            self.assertEqual(db.session.get(Producto, self.product_id).stock, 6)
+            self.assertEqual(db.session.get(Producto, self.second_product_id).stock, 2)
+            self.assertEqual(Orden.query.count(), 0)
+            self.assertEqual(OrdenProducto.query.count(), 0)
+
+    def test_checkout_rejects_unknown_product_without_creating_order(self):
+        response = self.client.post(
+            "/api/checkout",
+            headers=self.login_headers(),
+            json={"items": [
+                {"producto_id": self.product_id, "cantidad": 1},
+                {"producto_id": 999999, "cantidad": 1},
+            ]},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        with app.app_context():
+            self.assertEqual(db.session.get(Producto, self.product_id).stock, 6)
+            self.assertEqual(Orden.query.count(), 0)
 
 
 if __name__ == "__main__":

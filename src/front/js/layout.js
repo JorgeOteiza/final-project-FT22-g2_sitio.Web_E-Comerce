@@ -23,6 +23,7 @@ const DetallesPedido = lazy(() => import("./pages/DetallesPedido.jsx"));
 const MetodoDePago = lazy(() => import("./pages/metodoDePago.jsx"));
 const MetodoDePagoRevisar = lazy(() => import("./pages/metodoDePagoRevisar.jsx"));
 const Direccion = lazy(() => import("./component/Direccion.jsx"));
+const CompraExitosa = lazy(() => import("./pages/compraExitosa.jsx"));
 //create your first component
 const Layout = () => {
     //the basename is used when your project is published in a subdirectory and not in the root of the domain
@@ -85,6 +86,7 @@ const Layout = () => {
                                     <Direccion />
                                 </PrivateRoute>
                             } path="/metodo-de-pago/direccion" />
+                            <Route element={<PrivateRoute><CompraExitosa /></PrivateRoute>} path="/compra-exitosa" />
                             <Route element={<h1>Not found!</h1>} />
 
 

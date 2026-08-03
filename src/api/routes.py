@@ -1,8 +1,9 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+from datetime import datetime, timezone
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Producto, Favorito, HistorialCompra
+from api.models import db, User, Producto, Favorito, HistorialCompra, Orden, OrdenProducto
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
@@ -192,6 +193,96 @@ def get_historial():
     elif request.method == 'GET':
         historial_compras = HistorialCompra.query.filter_by(user_id=user_id).all()
         return jsonify([historial.serialize() for historial in historial_compras])
+
+@api.route('/checkout', methods=['POST'])
+@jwt_required()
+def checkout():
+    user_id = int(get_jwt_identity())
+    if db.session.get(User, user_id) is None:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+
+    data = request.get_json(silent=True) or {}
+    raw_items = data.get('items')
+    if not isinstance(raw_items, list) or not raw_items:
+        return jsonify({'message': 'El carrito está vacío'}), 400
+
+    quantities = {}
+    for item in raw_items:
+        if not isinstance(item, dict):
+            return jsonify({'message': 'El carrito contiene un producto inválido'}), 400
+        product_id = item.get('producto_id')
+        quantity = item.get('cantidad')
+        if not isinstance(product_id, int) or not isinstance(quantity, int) or quantity < 1:
+            return jsonify({'message': 'Cada producto debe tener una cantidad válida'}), 400
+        quantities[product_id] = quantities.get(product_id, 0) + quantity
+
+    try:
+        products = (
+            Producto.query
+            .filter(Producto.id.in_(quantities.keys()))
+            .with_for_update()
+            .all()
+        )
+        products_by_id = {product.id: product for product in products}
+
+        missing_ids = [product_id for product_id in quantities if product_id not in products_by_id]
+        if missing_ids:
+            db.session.rollback()
+            return jsonify({
+                'message': 'Uno o más productos ya no están disponibles',
+                'productos': missing_ids,
+            }), 404
+
+        unavailable = []
+        for product_id, quantity in quantities.items():
+            product = products_by_id[product_id]
+            if not product.active or product.stock < quantity:
+                unavailable.append({
+                    'id': product.id,
+                    'nombre': product.nombre,
+                    'solicitado': quantity,
+                    'disponible': product.stock if product.active else 0,
+                })
+        if unavailable:
+            db.session.rollback()
+            return jsonify({
+                'message': 'No hay stock suficiente para completar la compra',
+                'productos': unavailable,
+            }), 409
+
+        total = sum(
+            (product.precio_oferta or product.precio) * quantities[product.id]
+            for product in products
+        )
+        order = Orden(
+            fecha=datetime.now(timezone.utc),
+            total=total,
+            status='confirmada',
+            user_id=user_id,
+        )
+        db.session.add(order)
+        db.session.flush()
+
+        for product in products:
+            quantity = quantities[product.id]
+            unit_price = product.precio_oferta or product.precio
+            product.stock -= quantity
+            db.session.add(OrdenProducto(
+                cantidad=quantity,
+                precio=unit_price,
+                orden_id=order.id,
+                producto_id=product.id,
+            ))
+            db.session.add(HistorialCompra(producto_id=product.id, user_id=user_id))
+
+        db.session.commit()
+        return jsonify({
+            'message': 'Compra confirmada',
+            'orden': order.serialize(),
+        }), 201
+    except Exception:
+        db.session.rollback()
+        return jsonify({'message': 'No se pudo completar la compra'}), 500
     
 @api.route('/reset_password', methods=['POST', 'GET', 'PUT'])
 def reset_password():

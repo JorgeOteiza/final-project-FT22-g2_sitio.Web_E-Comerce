@@ -197,13 +197,16 @@ class Orden(db.Model):
     # Conexiones
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     factura = db.relationship("Factura", backref="orden", uselist=False)
+    productos = db.relationship("OrdenProducto", backref="orden", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
+            "numero_orden": f"RV-{self.id:06d}",
             "fecha": self.fecha,
             "total": self.total,
             "status": self.status,
+            "productos": [item.serialize() for item in self.productos],
         }
 
     def serialize_with_factura(self):
@@ -340,6 +343,9 @@ class OrdenProducto(db.Model):
             "id": self.id,
             "cantidad": self.cantidad,
             "precio": self.precio,
+            "subtotal": self.cantidad * self.precio,
+            "producto_id": self.producto_id,
+            "producto": self.producto.serialize() if self.producto else None,
         }
 
     def save(self):
