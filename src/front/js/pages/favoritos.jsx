@@ -1,12 +1,13 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
-import { Card } from "../component/Card.jsx";
+import { Card, ProductCardSkeleton } from "../component/Card.jsx";
 import "../../styles/favoritos.css";
 
 const Favoritos = () => {
   const { store } = useContext(Context);
-  const favorites = store.favorites || [];
+  const favorites = Array.isArray(store.favorites) ? store.favorites : [];
+  const loading = store.favoritesLoading;
   return (
     <main className="container favorites-page">
       <header className="wine-catalog-header">
@@ -14,7 +15,7 @@ const Favoritos = () => {
         <h1>Vinos favoritos</h1>
         <p>Guarda aquí las etiquetas que quieres volver a encontrar.</p>
       </header>
-      {favorites.length ? <div className="row g-4"><Card productos={favorites} /></div> : (
+      {loading ? <div className="row g-4">{Array.from({ length: 4 }).map((_, index) => <ProductCardSkeleton key={index} />)}</div> : favorites.length ? <div className="row g-4"><Card productos={favorites} /></div> : (
         <div className="wine-empty-state">
           <i className="fa-regular fa-heart" />
           <h2>Aún no tienes favoritos</h2>

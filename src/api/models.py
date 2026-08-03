@@ -17,7 +17,7 @@ class User(db.Model):
     last_login = db.Column(db.DateTime())
     # Conexiones
     profile = db.relationship("Profile", backref="user", uselist=False)
-    favoritos = db.relationship("Favorito", backref="user")
+    favoritos = db.relationship("Favorito", backref="user", cascade="all, delete-orphan")
     facturas = db.relationship("Factura", backref="user")
     ordenes = db.relationship("Orden", backref="user")
     historialCompra = db.relationship("HistorialCompra", backref="user")
@@ -123,6 +123,9 @@ class Profile(db.Model):
 
 class Favorito(db.Model):
     __tablename__ = "favoritos"
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "producto_id", name="uq_favoritos_user_producto"),
+    )
     # Informaci贸n de columnas
     id = db.Column(db.Integer, primary_key=True)
     # Conexiones
@@ -239,7 +242,7 @@ class Producto(db.Model):
     active = db.Column(db.Boolean(), nullable=False)
     image = db.Column(db.String(200), nullable=False)
     # Conexiones
-    favoritos = db.relationship("Favorito", backref="producto")
+    favoritos = db.relationship("Favorito", backref="producto", cascade="all, delete-orphan")
     ordenesProductos = db.relationship("OrdenProducto", backref="producto")
     facturasProductos = db.relationship("FacturaProducto", backref="producto")
     historialCompra = db.relationship("HistorialCompra", backref="producto")

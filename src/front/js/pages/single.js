@@ -15,7 +15,8 @@ const Single = () => {
   const token = localStorage.getItem("token");
   const effectivePrice = product.precio_oferta || product.precio || 0;
   const inCart = store.shoppingCart?.some(item => item.id === product.id || item.nombre === product.nombre);
-  const favorite = (store.favorites || []).some(item => item.id === product.id);
+  const favorites = Array.isArray(store.favorites) ? store.favorites : [];
+  const favorite = favorites.some(item => item.id === product.id);
   const isIconWine = product.precio_oferta >= 200000;
   const isLimitedAllocation = product.nombre?.toLowerCase().includes("almaviva");
   const discount = product.precio_oferta ? Math.round((1 - product.precio_oferta / product.precio) * 100) : 0;
@@ -44,7 +45,7 @@ const Single = () => {
     ["Tipo", product.tipo], ["Cepa", product.cepa], ["Categoría", product.categoria], ["Formato", product.unitFormat],
   ].filter(([, value]) => value), [product]);
 
-  const toggleFavorite = () => {
+  const toggleFavorite = async () => {
     if (!token) {
       Swal.fire({
         icon:"info", title:"Accede para guardar favoritos",
@@ -53,8 +54,12 @@ const Single = () => {
       });
       return;
     }
-    const added = actions.toggleFavorite(product);
-    Swal.fire({ toast:true, position:"top-end", timer:2200, showConfirmButton:false, icon:"success", title:added ? "Guardado en favoritos" : "Eliminado de favoritos" });
+    try {
+      const added = await actions.toggleFavorite(product);
+      Swal.fire({ toast:true, position:"top-end", timer:2200, showConfirmButton:false, icon:"success", title:added ? "Guardado en favoritos" : "Eliminado de favoritos" });
+    } catch (error) {
+      Swal.fire({ icon:"error", title:"No pudimos actualizar tus favoritos", text:error.message, confirmButtonColor:"#7b2121" });
+    }
   };
 
   const addToCart = () => {

@@ -22,7 +22,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			token: localStorage.getItem("token"),
 			product: {},
 			shoppingCart: JSON.parse(window.localStorage.getItem("shoppingCart")) || [],
-			favorites: JSON.parse(window.localStorage.getItem("favorites")) || [],
+			favorites: [],
+			favoritesLoading: Boolean(localStorage.getItem("token")),
 
 			//productos
 			search: "",
@@ -64,8 +65,39 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				localStorage.setItem("token", data.token);
 				localStorage.setItem("user_id", data.user_id);
-
+				await getActions().fetchFavorites();
 				return true;
+			},
+			fetchFavorites: async () => {
+				if (!localStorage.getItem("token")) {
+					setStore({ favorites: [], favoritesLoading: false });
+					return [];
+				}
+				setStore({ favoritesLoading: true });
+				try {
+					let legacyFavorites = [];
+					try {
+						const storedFavorites = JSON.parse(window.localStorage.getItem("favorites"));
+						legacyFavorites = Array.isArray(storedFavorites) ? storedFavorites : [];
+					} catch (_) {
+						legacyFavorites = [];
+					}
+					if (legacyFavorites.length) {
+						await Promise.allSettled(
+							legacyFavorites
+								.filter(product => product?.id)
+								.map(product => apiFetch(`/favoritos/${product.id}`, { method: "POST" }))
+						);
+					}
+					const favoritesResponse = await apiFetch("/favoritos");
+					const favorites = Array.isArray(favoritesResponse) ? favoritesResponse : [];
+					setStore({ favorites, favoritesLoading: false });
+					window.localStorage.removeItem("favorites");
+					return favorites;
+				} catch (error) {
+					setStore({ favorites: [], favoritesLoading: false });
+					throw error;
+				}
 			},
 			processPayment: async (_user_id, product_id) => {
 				try {
@@ -99,11 +131,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					shoppingCart
 				})
 			},
-			toggleFavorite: (product) => {
-				const favorites = getStore().favorites || [];
+			toggleFavorite: async (product) => {
+				const favorites = Array.isArray(getStore().favorites) ? getStore().favorites : [];
 				const exists = favorites.some(item => item.id === product.id);
-				const updated = exists ? favorites.filter(item => item.id !== product.id) : [...favorites, product];
-				window.localStorage.setItem("favorites", JSON.stringify(updated));
+				await apiFetch(`/favoritos/${product.id}`, { method: exists ? "DELETE" : "POST" });
+				const updated = exists ? favorites.filter(item => item.id !== product.id) : [product, ...favorites];
 				setStore({ favorites: updated });
 				return !exists;
 			},

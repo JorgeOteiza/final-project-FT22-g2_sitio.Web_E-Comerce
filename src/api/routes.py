@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Producto, HistorialCompra
+from api.models import db, User, Producto, Favorito, HistorialCompra
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
@@ -81,10 +81,55 @@ def get_all_products_by_category(categoria):
     productos = Producto.query.filter_by(categoria=categoria)
     return jsonify([category.serialize() for category in productos])
 
+@api.route('/favoritos', methods=['GET'])
+@jwt_required()
+def get_favorites():
+    user_id = int(get_jwt_identity())
+    favoritos = Favorito.query.filter_by(user_id=user_id).order_by(Favorito.id.desc()).all()
+    return jsonify([
+        favorito.producto.serialize()
+        for favorito in favoritos
+        if favorito.producto is not None
+    ]), 200
+
+@api.route('/favoritos/<int:producto_id>', methods=['POST', 'DELETE'])
+@jwt_required()
+def manage_favorite(producto_id):
+    user_id = int(get_jwt_identity())
+    if db.session.get(User, user_id) is None:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+
+    producto = db.session.get(Producto, producto_id)
+    if producto is None:
+        return jsonify({'message': 'Producto no encontrado'}), 404
+
+    favorito = Favorito.query.filter_by(
+        user_id=user_id,
+        producto_id=producto_id
+    ).first()
+
+    if request.method == 'POST':
+        if favorito is not None:
+            return jsonify(producto.serialize()), 200
+        try:
+            favorito = Favorito(user_id=user_id, producto_id=producto_id)
+            db.session.add(favorito)
+            db.session.commit()
+            return jsonify(producto.serialize()), 201
+        except IntegrityError:
+            db.session.rollback()
+            return jsonify(producto.serialize()), 200
+
+    if favorito is None:
+        return '', 204
+    db.session.delete(favorito)
+    db.session.commit()
+    return '', 204
+
 @api.route('/users/me', methods=['GET', 'DELETE'])
 @jwt_required()
 def current_user():
-    user = User.query.get(int(get_jwt_identity()))
+    user = db.session.get(User, int(get_jwt_identity()))
     if user is None:
         return jsonify({'message': 'Usuario no encontrado'}), 404
     if request.method == 'DELETE':
