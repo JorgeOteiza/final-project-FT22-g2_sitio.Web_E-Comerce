@@ -1,38 +1,18 @@
-.footer {
-    background-color: #7B2121;
-}
-
-.social-icon {
-    margin-top: 70px !important;
-    margin-left: 10px;
-    margin-right: 10px;
-    display: inline-block;
-    color: white;
-}
-
-h6 {
-    color: white;
-}
-
-p {
-    color: white;
-}
-
-a {
-    color: white;
-}
-
-.consumoResponsable {
-    margin-top: 70px;
-}
-
-.github-links a .svg-inline--fa {
-    color: black;
-    margin-left: 10px;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-
-}
+.wine-footer { background:#211714; color:#f8f3ed; margin-top:80px; }
+.wine-footer-grid { display:grid; grid-template-columns:1.5fr repeat(3,1fr); gap:48px; padding:64px 24px 48px; text-align:left; }
+.wine-footer h2 { color:#fff; font-size:1rem; text-transform:uppercase; letter-spacing:.12em; margin-bottom:20px; }
+.wine-footer p { color:#cfc4bb; line-height:1.7; }
+.wine-footer-brand>img { width:150px; height:auto; margin-bottom:18px; }
+.wine-footer nav { display:flex; flex-direction:column; gap:12px; }
+.wine-footer a { color:#d9cec5; text-decoration:none; transition:color .2s ease; }
+.wine-footer a:hover { color:#fff; }
+.wine-footer-social { display:flex; gap:12px; margin-top:20px; }
+.wine-footer-social a { width:38px; height:38px; border:1px solid #594a44; border-radius:50%; display:grid; place-items:center; }
+.wine-footer-payment>img { width:130px; background:white; border-radius:8px; padding:8px; }
+.wine-responsible { display:flex; align-items:center; gap:12px; margin-top:22px; }
+.wine-responsible img { width:48px; height:48px; object-fit:contain; }
+.wine-responsible p { font-size:.78rem; margin:0; }
+.wine-footer-bottom { border-top:1px solid #42332e; color:#9f918a; font-size:.82rem; }
+.wine-footer-bottom .container { display:flex; justify-content:space-between; gap:20px; padding:20px 24px; }
+@media(max-width:900px){.wine-footer-grid{grid-template-columns:1fr 1fr}.wine-footer-bottom .container{flex-direction:column}}
+@media(max-width:560px){.wine-footer-grid{grid-template-columns:1fr;gap:32px}}

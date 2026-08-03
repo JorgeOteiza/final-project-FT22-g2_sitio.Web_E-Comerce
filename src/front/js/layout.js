@@ -43,6 +43,7 @@ const Layout = () => {
             <MetodoPagoProvider>
                 <BrowserRouter basename={basename}>
                     <ScrollToTop>
+                        <div id="page-top" aria-hidden="true" />
                         <Navbar />
                         <Routes>
                             <Route element={<Home />} path="/" />

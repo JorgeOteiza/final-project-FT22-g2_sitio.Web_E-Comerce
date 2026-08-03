@@ -1,62 +1,51 @@
-import React, { useContext, useEffect } from "react";
-import "../../styles/modalControlEdad.css"
+import React, { useEffect } from "react";
+import "../../styles/modalControlEdad.css";
 import logoElRinconDelVino from "../../img/logoElRinconDelVino.png";
-import { Context } from "../store/appContext";
 
 const ModalControlEdad = () => {
-
-    const { store, actions } = useContext(Context);
-
-    const token = localStorage.getItem("token");
-
     useEffect(() => {
+        if (sessionStorage.getItem("ageVerified") === "true") return undefined;
 
-        if (token == null) {
-            // Función para activar el modal después de un cierto tiempo
-            function activateModal() {
-                var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
-                    keyboard: false
-                });
-                myModal.show();
-            }
+        const timer = window.setTimeout(() => {
+            const element = document.getElementById("staticBackdrop");
+            if (!element) return;
+            const ageModal = bootstrap.Modal.getOrCreateInstance(element, {
+                backdrop: "static",
+                keyboard: false,
+            });
+            ageModal.show();
+        }, 650);
 
-            // Activar la función después de 1 segundos
-            const timer = setTimeout(() => {
-                activateModal();
-            }, 1000);
-
-            return () => clearTimeout(timer); // Limpiar el temporizador si el componente se desmonta
-
-        } else {
-            console.log("")
-        }
+        return () => window.clearTimeout(timer);
     }, []);
-    // Función para redireccionar al hacer clic en "No"
+
+    const confirmAge = () => sessionStorage.setItem("ageVerified", "true");
+
     const redirectToSenda = () => {
         window.location.href = "https://www.senda.gob.cl/informacion-sobre-drogas/conoce-mas-sobre-las-drogas/alcohol/";
     };
 
     return (
-        <>
-
-            <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content modal-content-control-edad">
-                        <div className="modal-header-control-edad">
-                            <img src={logoElRinconDelVino} className="img-fluid modal-control" alt="logo" />
-                        </div>
-                        <div className="modal-body-control-edad">
-                            ¿Tienes la edad legal para beber alcohol en tu país?
-                        </div>
-                        <div className="modal-footer-control-edad">
-                            <button type="button" className="btn btn-dark btn-control-edad" data-bs-dismiss="modal">Si</button>
-                            <button type="button" className="btn btn-dark btn-control-edad" onClick={redirectToSenda}>No</button>
-                        </div>
+        <div className="modal fade age-modal" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-describedby="ageModalDescription" aria-hidden="true">
+            <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content modal-content-control-edad">
+                    <div className="age-modal-accent" aria-hidden="true" />
+                    <div className="modal-header-control-edad">
+                        <img src={logoElRinconDelVino} className="modal-control" alt="El Rincón del Vino" />
+                    </div>
+                    <div className="modal-body-control-edad">
+                        <span className="age-modal-eyebrow">Consumo responsable</span>
+                        <div className="age-modal-icon"><i className="fa-solid fa-wine-glass" /></div>
+                        <h1 id="staticBackdropLabel">¿Tienes la edad legal para beber alcohol?</h1>
+                        <p id="ageModalDescription">Para ingresar a nuestra tienda debes confirmar que cumples la edad legal vigente en tu país.</p>
+                    </div>
+                    <div className="modal-footer-control-edad">
+                        <button type="button" className="age-modal-button age-modal-confirm" data-bs-dismiss="modal" onClick={confirmAge}>Sí, ingresar</button>
+                        <button type="button" className="age-modal-button age-modal-decline" onClick={redirectToSenda}>No, salir</button>
                     </div>
                 </div>
             </div>
-
-        </>
-    )
-}
+        </div>
+    );
+};
 export default ModalControlEdad;

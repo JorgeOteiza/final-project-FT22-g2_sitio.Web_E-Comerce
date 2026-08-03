@@ -1,186 +1,78 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoUrl from "../../img/logoElRinconDelVino.png";
 import LogIn from "./LogIn.jsx";
 import ModalContact from "./ModalContact.jsx";
 import RestaurarContraseña from "./ModalRestaurarContraseña.jsx";
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Context } from "../store/appContext";
-import { NavBarShoppingCart } from "./NavBarShoppingCart.jsx"
-import { CardContainer16 } from "./Card.jsx";
-import BarraDeBusqueda from "./BarraDeBusqueda.jsx";
 import ModalCerrarSesion from "./ModalCerrarSesion.jsx";
+import BarraDeBusqueda from "./BarraDeBusqueda.jsx";
+import { NavBarShoppingCart } from "./NavBarShoppingCart.jsx";
+
+const DropdownLink = ({ to, children }) => <li><Link className="dropdown-item" to={to}>{children}</Link></li>;
 
 const Navbar = () => {
-	const { store, actions } = useContext(Context);
-	const [tipo, setTipo] = useState(null);
-	const [categoria, setCategoria] = useState(null);
-	const token = localStorage.getItem("token");
-	const navigate = useNavigate();
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const navigate = useNavigate();
 
-	const handleLogout = () => {
-		localStorage.removeItem("token");
-		localStorage.removeItem("user_id");
-		localStorage.removeItem("shoppingCart");
-		setTimeout(() => {
-			navigate("registro");
-		}, 2000);
+  useEffect(() => {
+    const syncSession = () => setToken(localStorage.getItem("token"));
+    window.addEventListener("auth-expired", syncSession);
+    window.addEventListener("storage", syncSession);
+    return () => {
+      window.removeEventListener("auth-expired", syncSession);
+      window.removeEventListener("storage", syncSession);
+    };
+  }, []);
 
-		setTimeout(() => {
-			window.location.reload(false);
-		}, 2001);
-	};
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("shoppingCart");
+    navigate("/");
+    window.location.reload();
+  };
 
-	const handleSearch = (busqueda) => {
-		setTimeout(() => {
-			window.location.href = process.env.BASENAME + `busqueda?q=${busqueda}`
-		}, 10);
-
-	};
-
-	return (
-		<>
-			<div className="text-center">
-				<LogIn />
-				<ModalContact />
-				<RestaurarContraseña />
-				<ModalCerrarSesion />
-			</div>
-
-			<nav className="container-navbar navbar navbar-expand-lg" style={{ color: "white", backgroundColor: "#7B2121", fontFamily: "Arial" }}>
-				<div className="container-fluid">
-
-					{/* ---- / LOGO / ---- */}
-					<Link to="/">
-						<img className="mx-5 img-logo-navbar-custom" src={logoUrl} width="130px" height="100px" />
-					</Link>
-
-					{/* REDES SOCIALES */}
-					<div className="nav-item categories-navbar-items categories-navbar-items-social nav-link active text-white h4 flex-end" aria-current="page">
-						<a href="http://instagram.com" target="_blank" className="text-white">
-							<i className="fa-brands fa-instagram"></i>
-						</a>
-						<a href="http://facebook.com" target="_blank" className="text-white">
-							<i className="fa-brands fa-square-facebook px-3"></i>
-						</a>
-					</div>
-
-					<button className="navbar-toggler navbar-toggler-button navbar-toggler-button-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-						aria-expanded="false" aria-label="Toggle navigation" style={{ color: "white", backgroundColor: "#7B2121" }}>
-						<span className="navbar-toggler-icon navbar-toggler-icon-custom"><FontAwesomeIcon icon={faCaretDown} size="2x" /></span>
-					</button>
-
-					{/* Contenido colapsable */}
-					<div className="collapse navbar-collapse navbar-collapse-custom" id="navbarSupportedContent">
-
-						<div className="nav-item dropdown categories-navbar-items">
-							{/* ----- / BARRA DE CATEGORÍAS / ----- */}
-
-							{/* PRIMERA CATEGORÍA */}
-							<Link className="nav-link dropdown-toggle text-white h4 navbar-categories-custom" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-								Tipos
-							</Link>
-							<ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-								<Link to="/busqueda?q=tinto" className="text-decoration-none" onClick={() => { handleSearch("tinto"); }}>
-									<li><a className="dropdown-item" href="#">Tinto</a></li>
-								</Link>
-								<Link to="/busqueda?q=blanco" className="text-decoration-none" onClick={() => { handleSearch("blanco"); }}>
-									<li><a className="dropdown-item" href="#">Blanco</a></li>
-								</Link>
-								<Link to="/busqueda?q=rosé" className="text-decoration-none" onClick={() => { handleSearch("rosé"); }}>
-									<li><a className="dropdown-item" href="#">Rosé</a></li>
-								</Link>
-								<Link to="/busqueda?q=espumante" className="text-decoration-none" onClick={() => { handleSearch("espumante"); }}>
-									<li><a className="dropdown-item" href="#">Espumante</a></li>
-								</Link>
-							</ul>
-						</div>
-
-						{/* SEGUNDA CATEGORÍA */}
-						<div className="navbar-expand-lg nav-item dropdown categories-navbar-items">
-							<Link className="nav-link dropdown-toggle text-white h4 navbar-categories-custom" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-								Categorías
-							</Link>
-							<ul className="dropdown-menu " aria-labelledby="navbarDropdown">
-								<Link to="/busqueda?q=reserva" className="text-decoration-none" onClick={() => { handleSearch("reserva"); }}>
-									<li><a className="dropdown-item" href="#">Reserva</a></li>
-								</Link>
-								<Link to="/busqueda?q=gran-reserva" className="text-decoration-none" onClick={() => { handleSearch("gran reserva"); }}>
-									<li><a className="dropdown-item" href="#">Gran reserva</a></li>
-								</Link>
-							</ul>
-						</div>
-
-						{/* CONTÁCTANOS */}
-						<div className="nav-item categories-navbar-items">
-							<button type="button" className="btn-contactanos-navbar h4 navbar-categories-custom" data-bs-toggle="modal" data-bs-target="#ModalContact">
-								Contáctanos
-							</button>
-						</div>
-
-					</div> {/* termina el collapse */}
-
-					{/* ---- / BARRA Y BOTÓN DE BÚSQUEDA / ---- */}
-					<div className="container-busqueda-formulario-navbar">
-						<BarraDeBusqueda />
-					</div>
-
-					{/* empiezan los logos del carrito y loggin */}
-					<div className="icons-navbar h2 px-1 m-auto d-flex ms-auto flex-start">
-						<NavBarShoppingCart tipo={tipo} categoria={categoria} />
-						{/* ---- / DROPDOWN LOG-IN - REGISTER / ---- */}
-						{token == null ? (
-							<>
-								<ul className="navbar-nav">
-									<li className="nav-item dropstart button-register-login-navbar">
-										<Link className="nav-link dropdown text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-											<i className="fa-solid fa-right-to-bracket px-3"></i>
-										</Link>
-										<ul className="dropdown-menu p-2" aria-labelledby="navbarDropdown2">
-											<li>
-												<button className="dropdown-item border-bottom" data-bs-toggle="modal" data-bs-target="#modalLogin" type="button">Acceder</button>
-											</li>
-											<li>
-												<Link to="/registro" className="text-decoration-none">
-													<a className="dropdown-item" href="#">Registrarse</a>
-												</Link>
-											</li>
-										</ul>
-									</li>
-								</ul>
-							</>
-						) : (
-							<>
-								<ul className="navbar-nav">
-									<li className="nav-item dropstart button-register-login-navbar">
-										<Link className="nav-link dropdown text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-											<i className="fa-solid fa-right-from-bracket px-3"></i>
-										</Link>
-										<ul className="dropdown-menu p-2" aria-labelledby="navbarDropdown2">
-											<li className="dropdown-item d-flex justify-content-center container-button-perfil-dropdown w-100 border-bottom">
-												<Link to="/perfil" className="button-perfil-dropdown">
-													Perfil
-												</Link>
-											</li>
-											<li className="dropdown-item">
-												<button data-bs-toggle="modal" data-bs-target="#modalCerrarSesion" className="button-cerrar-sesion-dropdown" onClick={handleLogout}>
-													Cerrar sesión
-												</button>
-											</li>
-										</ul>
-									</li>
-								</ul>
-							</>
-						)}
-					</div>
-					{/* terminan los logos del carrito y loggin */}
-				</div>
-			</nav>
-
-
-		</>
-	);
+  return (
+    <>
+      <LogIn />
+      <ModalContact />
+      <RestaurarContraseña />
+      <ModalCerrarSesion />
+      <nav className="navbar navbar-expand-lg wine-navbar" aria-label="Navegación principal">
+        <div className="container-fluid wine-navbar-inner">
+          <Link className="wine-navbar-brand" to="/" aria-label="Ir al inicio"><img src={logoUrl} alt="El Rincón del Vino" /></Link>
+          <button className="navbar-toggler wine-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Abrir menú"><i className="fa-solid fa-bars" /></button>
+          <div className="collapse navbar-collapse wine-navbar-collapse" id="navbarSupportedContent">
+            <ul className="navbar-nav wine-navbar-links">
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Tipos</button>
+                <ul className="dropdown-menu wine-dropdown">
+                  <DropdownLink to="/busqueda?tipo=tinto">Tintos</DropdownLink><DropdownLink to="/busqueda?tipo=blanco">Blancos</DropdownLink><DropdownLink to="/busqueda?tipo=rosé">Rosé</DropdownLink><DropdownLink to="/busqueda?tipo=espumante">Espumantes</DropdownLink>
+                </ul>
+              </li>
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Categorías</button>
+                <ul className="dropdown-menu wine-dropdown">
+                  <DropdownLink to="/busqueda?categoria=reserva">Reserva</DropdownLink><DropdownLink to="/busqueda?categoria=gran%20reserva">Gran reserva</DropdownLink><DropdownLink to="/busqueda?categoria=premium">Premium</DropdownLink><DropdownLink to="/busqueda?ofertas=1">Ofertas</DropdownLink>
+                </ul>
+              </li>
+              <li className="nav-item"><button className="nav-link" data-bs-toggle="modal" data-bs-target="#ModalContact">Contáctanos</button></li>
+            </ul>
+            <div className="wine-navbar-search-wrap"><BarraDeBusqueda /></div>
+            <div className="wine-navbar-actions">
+              <NavBarShoppingCart />
+              <div className="dropdown">
+                <button className="wine-navbar-icon" data-bs-toggle="dropdown" aria-expanded="false" aria-label={token ? "Menú de usuario" : "Acceder"}><i className={`fa-solid ${token ? "fa-user" : "fa-right-to-bracket"}`} /></button>
+                <ul className="dropdown-menu dropdown-menu-end wine-dropdown">
+                  {token ? <><DropdownLink to="/perfil">Mi perfil</DropdownLink><DropdownLink to="/favoritos">Mis favoritos</DropdownLink><li><button className="dropdown-item" onClick={logout}>Cerrar sesión</button></li></> : <><li><button className="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalLogin">Acceder</button></li><DropdownLink to="/registro">Crear cuenta</DropdownLink></>}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
+  );
 };
 
 export default Navbar;

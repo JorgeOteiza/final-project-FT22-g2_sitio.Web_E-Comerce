@@ -1,304 +1,113 @@
-import React, { useContext, useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 import { Context } from "../store/appContext.js";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import vinoFavoritos from "../../img/vino-add-favorites.png";
-import vinoQuitarFavoritos from "../../img/vino-modified 1.png"
-import { useParams } from "react-router-dom";
-import Swal from 'sweetalert2';
-
-
-import ProductCard from "../component/ProductCard.jsx";
+import { formatPrice } from "../component/Card.jsx";
 import "../../styles/ProductCard.css";
-import { Link } from "react-router-dom";
+
+const DetailBadge = ({ children, tone = "default" }) => <span className={`single-badge single-badge-${tone}`}>{children}</span>;
 
 const Single = () => {
   const { store, actions } = useContext(Context);
-  const {
-    nombre = "", precio = 0, precio_oferta, image, stars, unitFormat, tipo,
-    marca, cepa, categoria, descripcion, stock = 0,
-  } = store.product || {};
-  const precioUnitario = precio_oferta || precio;
-
-  const token = localStorage.getItem("token");
-
-  const [favorito, setFavorito] = useState(false);
-  const [cantidad, setCantidad] = useState(1)
-  const [precioTotal, setPrecioTotal] = useState(precioUnitario)
-
-  const handleAddFavorites = () => {
-    setFavorito(!favorito);
-  }
-
-  const agregarAlCarrito = () => {
-    const existingItem = store.shoppingCart.find(item => item.nombre === nombre);
-
-    if (existingItem) {
-      // Sumar la cantidad al item existente
-      existingItem.cantidad += cantidad;
-    } else {
-      // Agregar nuevo item con cantidad seteada
-      actions.setShoppingCart([...store.shoppingCart, {
-        nombre,
-        precio: precioUnitario,
-        image,
-        stars,
-        unitFormat,
-        tipo,
-        cantidad
-      }]);
-    }
-  };
-
-  const handleSumar = () => {
-    setCantidad(cantidad + 1);
-    setPrecioTotal(precioUnitario * (cantidad + 1))
-
-    actions.updateShoppingCart(nombre, cantidad + 1);
-  }
-
-  const handleRestar = () => {
-    if (cantidad > 1) {
-      setCantidad(cantidad - 1);
-      setPrecioTotal(precioUnitario * (cantidad - 1))
-
-      actions.updateShoppingCart(nombre, cantidad - 1);
-    }
-  }
-
-  const handleAlertaProximamente = () => {
-    Swal.fire({
-      title: "¡Próximamente!",
-      icon: "info",
-      html: "En un futuro podrás hacerle saber tu humilde opinión a esta persona!",
-      showCancelButton: true,
-      confirmButtonText: `
-        <i class="fa fa-thumbs-up"></i> Bien!
-      `,
-      confirmButtonAriaLabel: "Thumbs up, great!",
-      cancelButtonText: `
-        <i class="fa fa-thumbs-down"></i>
-      `,
-      cancelButtonAriaLabel: "Thumbs down"
-    });
-  }
-
   const { id } = useParams();
+  const product = store.product || {};
+  const [quantity, setQuantity] = useState(1);
+  const token = localStorage.getItem("token");
+  const effectivePrice = product.precio_oferta || product.precio || 0;
+  const inCart = store.shoppingCart?.some(item => item.id === product.id || item.nombre === product.nombre);
+  const favorite = (store.favorites || []).some(item => item.id === product.id);
+  const isIconWine = product.precio_oferta >= 200000;
+  const isLimitedAllocation = product.nombre?.toLowerCase().includes("almaviva");
+  const discount = product.precio_oferta ? Math.round((1 - product.precio_oferta / product.precio) * 100) : 0;
+
+  useLayoutEffect(() => {
+    const resetProductScroll = () => {
+      document.getElementById("page-top")?.scrollIntoView({ block: "start", behavior: "auto" });
+      if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+    resetProductScroll();
+    const frame = window.requestAnimationFrame(resetProductScroll);
+    const timer = window.setTimeout(resetProductScroll, 250);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [id]);
 
   useEffect(() => {
     actions.fetchProduct(id);
-  }, [id])
+  }, [id]);
+  useEffect(() => { setQuantity(1); }, [product.id]);
 
-  useEffect(() => {
-    setPrecioTotal(precioUnitario * cantidad);
-  }, [cantidad, precioUnitario]);
+  const specs = useMemo(() => [
+    ["Tipo", product.tipo], ["Cepa", product.cepa], ["Categoría", product.categoria], ["Formato", product.unitFormat],
+  ].filter(([, value]) => value), [product]);
 
-  const formatPrice = (value) => new Intl.NumberFormat("es-CL", {
-    style: "currency", currency: "CLP", maximumFractionDigits: 0,
-  }).format(value || 0);
+  const toggleFavorite = () => {
+    if (!token) {
+      Swal.fire({
+        icon:"info", title:"Accede para guardar favoritos",
+        text:"Necesitas iniciar sesión para crear tu selección personal.",
+        confirmButtonText:"Entendido", confirmButtonColor:"#7b2121",
+      });
+      return;
+    }
+    const added = actions.toggleFavorite(product);
+    Swal.fire({ toast:true, position:"top-end", timer:2200, showConfirmButton:false, icon:"success", title:added ? "Guardado en favoritos" : "Eliminado de favoritos" });
+  };
 
-  const enCarrito = store.shoppingCart?.some(shoppingCartItem => nombre === shoppingCartItem.nombre)
+  const addToCart = () => {
+    if (inCart) return;
+    actions.setShoppingCart([...(store.shoppingCart || []), {
+      id:product.id, nombre:product.nombre, precio:effectivePrice, precio_original:product.precio,
+      image:product.image, tipo:product.tipo, unitFormat:product.unitFormat, cantidad:quantity, stock:product.stock,
+    }]);
+    Swal.fire({ toast:true, position:"top-end", timer:2500, showConfirmButton:false, icon:"success", title:`${product.nombre} agregado al carrito` });
+  };
+
+  if (!product.id || String(product.id) !== String(id)) return <main className="single-page"><div className="single-loading"><div className="wine-skeleton single-loading-image" /><div><div className="wine-skeleton wine-skeleton-line" /><div className="wine-skeleton wine-skeleton-line medium" /></div></div></main>;
 
   return (
-    <div className="container my-5">
-      <div className="row container-productCard d-flex justify-content-center flex-wrap">
-        {/* CARD IMG */}
-        <div className="col-12 col-md-4 col-lg-3 col-sm-12 custom-center custom-center-productCard">
-          <ProductCard imageUrl={image} />
-        </div>
-
-        <div className="col-12 col-md-8 col-lg-9">
-          <div className="container-informacion-producto row">
-
-            <div className="informacion-de-producto-single">
-              <h2 className="col-9 w-auto mb-3">
-                {nombre}
-              </h2>
-              <div className="calificacion-especificacion col-lg-6 col-md-12" style={{ width: "100%" }}>
-                <div className="detalle-especificacion-producto" style={{ display: "flex" }}>
-                  <div classNamee="tipo-especificacion-producto" style={{ flex: 1 }}>
-                    <p className="card-text text-start col-12 mb-0">
-                      <i className="fas fa-star stars"></i>
-                      <i className="fas fa-star stars"></i>
-                      <i className="fas fa-star stars"></i>
-                      <i className="fas fa-star stars"></i>
-                      <i className="fas fa-star stars"></i>
-                    </p>
-                    <p className="text-secondary col-12 mb-1 text-start">{marca}</p>
-                    <p className="text-secondary col-12 mb-1 text-start">{unitFormat}</p>
-                  </div>
-                  <button type="button" className="btn-add-favorites-product" onClick={handleAddFavorites}>
-                    <img className="add-favorites-img p-0 me-3" src={favorito ? vinoQuitarFavoritos : vinoFavoritos} alt="add-favorites" width="60px" height="60px" />
-                  </button>
-
-                </div>
-                <p className="text-secondary col-12 mb-1 text-start">Tipo: {tipo}</p>
-                <p className="text-secondary col-12 mb-1 text-start">Cepa: {cepa}</p>
-                <p className="text-secondary col-12 mb-1 text-start">Categoría: {categoria}</p>
-                <p className="text-secondary col-12 mb-3 text-start">Stock: {stock} unidades</p>
+    <main className={`single-page ${isIconWine ? "single-page-icon" : ""}`}>
+      <div className="container">
+        <nav className="single-breadcrumb" aria-label="Migas de pan"><Link to="/">Inicio</Link><span>/</span><Link to="/busqueda?q=">Vinos</Link><span>/</span><span>{product.nombre}</span></nav>
+        <section className="single-product-layout">
+          <div className="single-product-gallery">
+            <div className="single-product-image-wrap">
+              <div className="single-badges">
+                {isIconWine && <DetailBadge tone="icon"><i className="fa-solid fa-gem" /> Vino ícono</DetailBadge>}
+                {product.precio_oferta && <DetailBadge tone="offer">-{discount}%</DetailBadge>}
               </div>
-
+              <img src={product.image} alt={product.nombre} />
             </div>
-
-            <div className="section-cantidad-precio-añadir-producto">
-              <div className="price-carrito-hover text-start col-12 mt-5 mb-3 mx-0">
-                {precio_oferta && cantidad === 1 && (
-                  <span className="text-secondary text-decoration-line-through me-2">
-                    {formatPrice(precio)}
-                  </span>
-                )}
-                <span className={precio_oferta ? "text-danger h4" : "text-black h4"}>
-                  {formatPrice(precioTotal)}
-                </span>
-              </div>
-
-              <div className="container-buttons-producto col-12">
-                <div className="row mx-1">
-                  {/* BUTTON CANTIDAD DE PRODUCTO */}
-                  <div style={{ maxWidth: "340px", width: "100%" }}>
-                    <div className="row" >
-                      <button className="button-add-remove-product remove-product-button px-3 col-4" onClick={handleRestar}> - </button>
-                      <label className="label-cantidad-carrito-hover px-3 col-4 text-center"> {cantidad} </label>
-                      <button className="button-add-remove-product add-product-button px-3 col-4" onClick={handleSumar}> + </button>
-                    </div>
-                    {/* BUTTON AGREGAR AL CARRITO */}
-                    {token == null ? (
-                      <>
-                        {/* REDIRIGIR A REGISTER SI NO ESTA LOGEADO */}
-                        <div className="row">
-                          <Link to="/registro">
-                            <button disabled={enCarrito} type="button" className="btn btn-secondary rounded-pill my-2 col-12">
-                              Agregar al carrito
-                            </button>
-                          </Link>
-                        </div>
-
-                      </>
-                    ) : (
-                      <>
-                        {/* AÑADIR PRODUCTO AL CARRITO SI ESTÁ LOGEADO */}
-                        <div className="row">
-                          <button disabled={enCarrito} onClick={() => agregarAlCarrito()} type="button" className="btn btn-secondary rounded-pill my-2 col-12">
-                            Agregar al carrito
-                          </button>
-                        </div>
-
-
-                      </>
-                    )}
-                  </div>
-
-
-                </div >
-              </div >
-            </div >
-
-          </div >
-        </div >
-      </div >
-
-      {/* Sección de Descripción del producto */}
-      <div className="text-center my-4 mx-3 px-0">
-        <h4 className="bg-black text-white d-inline-block p-2 rounded rounded-lg">
-          Descripción del Producto
-        </h4>
-        <div className="ps-relative">
-          <p className="product-description text-start p-4 mb-0">{descripcion}</p>
-        </div>
-      </div>
-
-      {/* Sección de Reseñas del producto */}
-      <div className="text-center mt-3 mb-4">
-        <h4 className="bg-black text-white d-inline-block p-2 rounded rounded-lg">
-          Reseñas del Producto
-        </h4>
-        <div className="calificaciones-productCard d-flex align-items-center mx-3">
-          <h2 className="text-left">5</h2>
-
-          <div className="col container-calificaciones-reseñas row m-0 w-25">
-            <p className="stars m-0 p-0 col-12">
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-            </p>
-            <p className="text-black m-0 p-0 col-12">68 calificaciones</p>
+            {isIconWine && <div className="single-icon-note"><i className="fa-solid fa-award" /><div><strong>Una etiqueta excepcional</strong><span>Selección de colección para ocasiones memorables.</span></div></div>}
           </div>
-        </div>
-      </div>
-
-      {/** Condición para mostrar "sin calificaciones" */}
-      {/* {typeof stars === "number" && stars === 0 ? (
-            ) : null} */}
-
-      <div className="comment-productCard">
-        <div className="contenedor-stars-comment-product">
-          <div className="row">
-            <span className="ml-2 col-12 text-end">13 Nov. 2023</span>
-            <div className="stars ml-2 col-9 text-start">
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
+          <div className="single-product-info">
+            <span className="wine-eyebrow wine-eyebrow-dark">{product.marca}</span>
+            <div className="single-title-row"><h1>{product.nombre}</h1><button className={`single-favorite ${favorite ? "active" : ""} ${!token ? "requires-login" : ""}`} onClick={toggleFavorite} aria-label={token ? (favorite ? "Quitar de favoritos" : "Agregar a favoritos") : "Accede para agregar a favoritos"} title={!token ? "Inicia sesión para guardar favoritos" : ""}><i className={`${favorite ? "fa-solid" : "fa-regular"} fa-heart`} /></button></div>
+            <p className="single-subtitle">{product.cepa} · {product.unitFormat}</p>
+            <div className="single-price">
+              {product.precio_oferta && <span>{formatPrice(product.precio)}</span>}
+              <strong>{formatPrice(effectivePrice)}</strong>
+              {product.precio_oferta && <small>Ahorras {formatPrice(product.precio - product.precio_oferta)}</small>}
             </div>
-          </div>
-        </div>
-
-        <div className="mt-2 mb-2 text-start">
-          <p className="text-secondary">
-            Estaba maravilloso exquisito arte, 5 estrellas.
-          </p>
-          <button className="button-calificacion-comment-positiva me-3 p-1" onClick={handleAlertaProximamente}>
-            Es útil <i className="fa-regular fa-thumbs-up"></i>
-          </button>
-          <button className="button-calificacion-comment-negativa p-1" onClick={handleAlertaProximamente}>
-            <i className="fa-regular fa-thumbs-down" ></i>
-          </button>
-        </div>
-      </div>
-
-
-      <div className="comment-productCard">
-        <div className="contenedor-stars-comment-product">
-          <div className="row">
-            <span className="ml-2 col-12 text-end">13 Nov. 2023</span>
-            <div className="stars ml-2 col-9 text-start">
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="fas fa-star stars"></i>
-              <i className="far fa-star stars"></i>
+            <div className={`single-stock ${product.stock <= 5 && !isLimitedAllocation ? "low" : ""}`}><i className="fa-solid fa-circle" /> {product.stock > 0 && isLimitedAllocation ? `Disponibilidad limitada · ${product.stock} unidades` : product.stock > 5 ? `Disponible · ${product.stock} unidades` : product.stock > 0 ? `Últimas ${product.stock} unidades` : "Agotado"}</div>
+            <div className="single-specs">{specs.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+            <div className="single-purchase">
+              <div className="single-quantity"><button onClick={() => setQuantity(current => Math.max(1, current - 1))} aria-label="Reducir cantidad">−</button><span>{quantity}</span><button onClick={() => setQuantity(current => Math.min(product.stock, current + 1))} aria-label="Aumentar cantidad">+</button></div>
+              {token ? <button className="wine-button wine-button-primary single-cart-button" onClick={addToCart} disabled={inCart || !product.stock}><i className="fa-solid fa-bag-shopping" /> {inCart ? "Ya está en tu carrito" : "Agregar al carrito"}</button> : <Link className="wine-button wine-button-primary single-cart-button" to="/registro">Accede para comprar</Link>}
             </div>
+            <div className="single-service-notes"><span><i className="fa-solid fa-shield-halved" /> Compra protegida</span><span><i className="fa-solid fa-truck-fast" /> Despacho seguro</span></div>
           </div>
-        </div>
-
-        <div className="mt-2 mb-2 text-start">
-          <p className="text-secondary">
-            Espectacular, PERO.
-          </p>
-          <button className="button-calificacion-comment-positiva me-3 p-1" onClick={handleAlertaProximamente}>
-            Es útil <i className="fa-regular fa-thumbs-up"></i>
-          </button>
-          <button className="button-calificacion-comment-negativa p-1" onClick={handleAlertaProximamente}>
-            <i className="fa-regular fa-thumbs-down"></i>
-          </button>
-        </div>
+        </section>
+        <section className="single-description">
+          <div><span className="wine-eyebrow wine-eyebrow-dark">Notas del vino</span><h2>Descripción</h2></div>
+          <p>{product.descripcion}</p>
+        </section>
       </div>
-
-      {/* Media Query para pantallas más pequeñas */}
-
-      <style jsx>{`
-             @media only screen and (min-width: 320px) and (min-height: 380px)
-    `}</style>
-
-    </div >
+    </main>
   );
-};
-
-Single.propTypes = {
-  match: PropTypes.object,
 };
 
 export default Single;

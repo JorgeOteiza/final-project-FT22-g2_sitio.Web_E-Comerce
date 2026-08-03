@@ -1,106 +1,57 @@
-import React, { useContext, useEffect, useState } from 'react';
-import LocalStorageCarrito from '../component/localStorageCarrito.jsx';
-import rigoBaby from '../../img/rigo-baby.jpg'
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { Context } from "../store/appContext.js";
+import { formatPrice } from "../component/Card.jsx";
 import "../../styles/carrito.css";
-import { Link } from 'react-router-dom';
-import { Context } from '../store/appContext.js';
 
 const Carrito = () => {
-
   const { store, actions } = useContext(Context);
-  const shoppingCart = store.shoppingCart || [];
-
-  const [productos, setProductos] = useState([...shoppingCart]);
-
-  const deleteProduct = (index) => {
-    // Copia el array de productos y elimina el producto en el índice especificado
-    const nuevosProductos = [...shoppingCart];
-    nuevosProductos.splice(index, 1);
-    actions.setShoppingCart(nuevosProductos);
+  const products = store.shoppingCart || [];
+  const updateQuantity = (index, delta) => {
+    const updated = products.map((product, position) => position === index
+      ? { ...product, cantidad: Math.max(1, Math.min(product.stock || 99, product.cantidad + delta)) }
+      : product);
+    actions.setShoppingCart(updated);
   };
+  const remove = index => actions.setShoppingCart(products.filter((_, position) => position !== index));
+  const subtotal = products.reduce((total, product) => total + product.precio * product.cantidad, 0);
 
-  const incrementarCantidad = (index) => {
-    const nuevosProductos = [...shoppingCart];
-    nuevosProductos[index].cantidad++;
-    actions.setShoppingCart(nuevosProductos);
-  };
-
-  const decrementarCantidad = (index) => {
-    const nuevosProductos = [...shoppingCart];
-    if (nuevosProductos[index].cantidad > 1) {
-      nuevosProductos[index].cantidad--;
-      actions.setShoppingCart(nuevosProductos);
-    }
-  };
-
-  useEffect(() => {
-    setProductos([...store.shoppingCart]);
-  }, [store.shoppingCart]);
+  if (!products.length) return (
+    <main className="container cart-page">
+      <div className="wine-empty-state">
+        <i className="fa-solid fa-basket-shopping" />
+        <h1>Tu carrito está vacío</h1>
+        <p>Encuentra una botella especial y agrégala para continuar.</p>
+        <Link className="wine-button wine-button-primary" to="/busqueda?q=">Explorar el catálogo</Link>
+      </div>
+    </main>
+  );
 
   return (
-    <div className="container-card-vista-carrito">
-      <div className='container contenedor-vista-carrito my-4'>
-        <div className="row">
-          {/* <h2>${parseFloat(productos.price * productos.cantidad).toFixed(2)}</h2> */}
-          <h2 className='col-lg-3 col-md-4 col-sm-6 vista-carrito-categories'>Item</h2>
-          <h2 className='col-lg-6 col-md-4 col-sm-6 vista-carrito-categories'>Cantidad</h2>
-          <h2 className='col-lg-3 col-md-4 col-sm-12 vista-carrito-categories-valor'>Valor</h2>
-          {/* <LocalStorageCarrito /> */}
-        </div>
-        {productos.map((shoppingCartItem, index) => (
-          <div key={index}>
-
-            <div className="row fila-vista-carrito">
-              <div className="col-lg-3 col-md-4 col-sm-6 d-flex justify-content-center">
-                <img src={shoppingCartItem.image} width="auto" height="auto" alt="rigo" className='img-producto-vista-carrito' />
-              </div>
-              <div className="col-lg-6 col-md-4 col-sm-6 d-flex justify-content-center">
-                {/* BOTON AÑADIR Y QUITAR + PRECIO REUTILIZADO */}
-                <div className="product-price-carrito-hover d-inline-flex align-items-center justify-content-between">
-                  <button onClick={() => decrementarCantidad(index)} type='button' className="button-add-remove-carrito-hover remove-carrito-hover px-2">-</button>
-                  <label className="label-cantidad-carrito-hover px-2">{shoppingCartItem.cantidad}</label>
-                  <button onClick={() => incrementarCantidad(index)} type='button' className="button-add-remove-carrito-hover add-carrito-hover px-2">+</button>
-                </div>
-              </div>
-              <div className="col-lg-2 col-md-4 col-sm-6 columna-vista-carrito-valor columna-vista-carrito-precio-articulo">
-                <h2>${shoppingCartItem.precio * shoppingCartItem.cantidad}</h2>
-              </div>
-              <button onClick={() => deleteProduct(index)} className="col-1 columna-vista-carrito-valor icon-eliminar-producto-carrito"><i className="icon-hover-eliminar-producto fa-regular fa-trash-can"></i></button>
-            </div>
-          </div>
-        ))}
-
-        <div className="row fila-vista-carrito-separador"></div>
-
-        <div className="row">
-          <h2 className='col-lg-5 col-md-6 col-sm-6 vista-carrito-categories'></h2>
-          <h2 className='col-lg-4 col-md-6 col-sm-6 vista-carrito-categories'></h2>
-          <div className="col-lg-3 col-md-12 col-sm-12 vista-carrito-categories-valor">
-            <div className="row">
-              <div className="col-6 text-end">
-                <h5>Subtotal</h5>
-              </div>
-              <div className="col-6 ps-2">
-                <h5>${productos.reduce((total, prod) => total + prod.precio * prod.cantidad, 0)}</h5>
-              </div>
-              <div className="col-6 text-end">
-                <h4>Total</h4>
-              </div>
-              <div className="col-6 ps-2">
-                <h5>${productos.reduce((total, prod) => total + prod.precio * prod.cantidad, 0)}</h5>
-              </div>
-              <Link to="/metodo-de-pago" type="button" href="#" className="col-12 btn-confirmar-pedido-carrito text-decoration-none text-center">
-                Confirmar
-              </Link>
-
-            </div>
-          </div>
-
-        </div>
+    <main className="container cart-page">
+      <header className="wine-catalog-header"><span className="wine-eyebrow wine-eyebrow-dark">Tu compra</span><h1>Carrito</h1><p>{products.length} productos seleccionados</p></header>
+      <div className="cart-layout">
+        <section className="cart-items" aria-label="Productos del carrito">
+          {products.map((product, index) => (
+            <article className="cart-item" key={`${product.nombre}-${index}`}>
+              <img src={product.image} alt={product.nombre} />
+              <div className="cart-item-info"><h2>{product.nombre}</h2><p>{product.tipo} · {product.unitFormat || "750 ml"}</p><button className="cart-remove" onClick={() => remove(index)}><i className="fa-regular fa-trash-can" /> Eliminar producto</button></div>
+              <div className="cart-quantity"><button onClick={() => updateQuantity(index, -1)} aria-label="Reducir cantidad">−</button><span>{product.cantidad}</span><button onClick={() => updateQuantity(index, 1)} aria-label="Aumentar cantidad">+</button></div>
+              <strong>{formatPrice(product.precio * product.cantidad)}</strong>
+            </article>
+          ))}
+        </section>
+        <aside className="cart-summary">
+          <h2>Resumen de compra</h2>
+          <div><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
+          <div><span>Despacho</span><span>Calculado en el siguiente paso</span></div>
+          <div className="cart-total"><span>Total</span><strong>{formatPrice(subtotal)}</strong></div>
+          <Link className="wine-button wine-button-primary" to="/metodo-de-pago">Continuar al pago</Link>
+          <Link className="cart-continue" to="/busqueda?q=">Seguir comprando</Link>
+        </aside>
       </div>
-    </div>
-
-  )
-}
+    </main>
+  );
+};
 
 export default Carrito;

@@ -1,160 +1,36 @@
-import React from "react";
-import rigoBaby from "../../img/rigo-baby.jpg"
-
-import "../../styles/historialCompra.css";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiFetch } from "../services/api";
+import { formatPrice } from "../component/Card.jsx";
+import "../../styles/historialCompra.css";
 
 const HistorialCompra = () => {
-    return (
-        <div className="container-historial-compra">
-            <form className="container-input-search-historial-compra">
-                <input className="input-search-historial-compra" type="search" placeholder="Buscar entre mis compras" />
-            </form>
-            <div className="container-contenido-historial-compra">
-                {/* ---- // HISTORIAL DE PRODUCTOS // ---- */}
-                <div className="producto-historial-compra row text-center">
-                    <div className="img-producto-historial-compra col-2">
-                        <img src={rigoBaby} alt="example" width="100px" height="100px" />
-                    </div>
+  const [history, setHistory] = useState([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiFetch("/historial-compra").then(setHistory).catch(() => setHistory([])).finally(() => setLoading(false));
+  }, []);
+  const filtered = useMemo(() => history.filter(item => item.producto?.nombre?.toLowerCase().includes(query.toLowerCase())), [history, query]);
 
-                    {/* ---- Fecha de entrega ---- */}
-                    <div className="estado-envio-producto-historial-compra col-2 text-start">
-                        <h5 className="estado-de-producto">Enviado</h5>
-                        <h5>Entregado el 23/11/23</h5>
-                        <h5 className="unidades-producto-historial">1 unidad</h5>
-                    </div>
+  return (
+    <main className="history-page container">
+      <header className="wine-catalog-header"><span className="wine-eyebrow wine-eyebrow-dark">Tu recorrido</span><h1>Historial de compras</h1><p>Consulta los vinos que has comprado anteriormente.</p></header>
+      <label className="history-search"><i className="fa-solid fa-magnifying-glass" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar entre mis compras" /></label>
+      {loading ? <div className="history-list">{[1,2].map(item => <div className="history-card history-skeleton" key={item}><div className="wine-skeleton" /></div>)}</div> : filtered.length ? (
+        <div className="history-list">{filtered.map((item, index) => {
+          const product = item.producto;
+          return <article className="history-card" key={item.id}>
+            <div className="history-number"><span>Compra</span><strong>#{String(item.id).padStart(4,"0")}</strong></div>
+            <img src={product.image} alt={product.nombre} />
+            <div className="history-product"><span className="history-status"><i className="fa-solid fa-circle-check" /> Compra registrada</span><h2>{product.nombre}</h2><p>{product.marca} · {product.cepa}</p></div>
+            <div className="history-price"><span>Precio</span><strong>{formatPrice(product.precio_oferta || product.precio)}</strong></div>
+            <Link className="wine-card-button" to={`/producto/${product.id}`}>Volver a comprar</Link>
+          </article>;
+        })}</div>
+      ) : <div className="wine-empty-state"><i className="fa-solid fa-receipt" /><h2>{query ? "No encontramos esa compra" : "Aún no tienes compras registradas"}</h2><p>{query ? "Prueba con otro nombre de vino." : "Cuando completes una compra, aparecerá aquí con la imagen real del producto."}</p><Link className="wine-button wine-button-primary" to="/busqueda?q=">Explorar vinos</Link></div>}
+    </main>
+  );
+};
 
-                    {/* ---- Precio total ---- */}
-                    <div className="precio-total-producto-historial-compra col-2">
-                        <h5>Total</h5>
-                        <h5 className="pt-2">$$$</h5>
-                    </div>
-
-                    {/* ---- Calificación ---- */}
-                    <div className="calificacion-producto-historial-compra col-2">
-                        <h5>Calificación del producto:</h5>
-                        <p className="card-text text-align-center pt-1">
-                            <i className="fa-solid fa-star stars"></i>
-                            <i className="fa-solid fa-star stars"></i>
-                            <i className="fa-solid fa-star stars"></i>
-                            <i className="fa-solid fa-star stars"></i>
-                            <i className="fa-regular fa-star stars"></i>
-                        </p>
-                    </div>
-
-                    {/* ---- Fecha de compra ---- */}
-                    <div className="fecha-producto-historial-compra col-2">
-                        <h5>Comprado el:</h5>
-                        <h5 className="pt-2">21/11/23</h5>
-                    </div>
-
-                    {/* ---- Ver el pedido (En caso de que sea más de 1 objeto) ---- */}
-                    <div className="col-2">
-                        <button className="btn-ver-pedido-historial" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-historial-compra" aria-expanded="false" aria-controls="collapseExample">
-                            Ver pedido
-                        </button>
-                    </div>
-
-                    {/* ---- // COLLAPSE BOTON VER PEDIDO // ---- */}
-                    <div className="collapse mt-4" id="collapse-historial-compra">
-
-                        {/* ---- // PRODUCTO 1 EJEMPLO COLLAPSE // ---- */}
-                        <div className="card card-body body-collapse-historial-compra">
-                            <div className="producto-historial-compra row text-center">
-                                <div className="img-producto-historial-compra col-2">
-                                    <img src={rigoBaby} alt="example" width="100px" height="100px" />
-                                </div>
-
-                                {/* ---- Información del producto ---- */}
-                                <div className="estado-envio-producto-historial-compra col-2 text-start">
-                                    <h4>Vino tinto</h4>
-                                    <h5 className="unidades-producto-historial">Vino 750cc 1 unidad</h5>
-                                </div>
-
-                                <div className="precio-total-producto-historial-compra col-2">
-                                    <h5>Precio</h5>
-                                    <h5 className="pt-2">$$$</h5>
-                                </div>
-
-                                <div className="calificacion-producto-historial-compra col-2">
-                                    <h5>Calificación del producto:</h5>
-                                    <p className="card-text text-align-center pt-1">
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-regular fa-star stars"></i>
-                                    </p>
-                                </div>
-
-                                <div className="fecha-producto-historial-compra col-2">
-                                    <h5>Comprado el:</h5>
-                                    <h5 className="pt-2">21/11/23</h5>
-                                </div>
-
-                                <div className="container-ver-pedido-historial-compra col-2">
-                                    <Link to="/producto">
-                                        <button className="btn-volver-a-comprar-historial" type="button">
-                                            Volver a comprar
-                                        </button>
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ---- // PRODUCTO 2 EJEMPLO COLLAPSE // ---- */}
-                        <div className="card card-body body-collapse-historial-compra">
-
-                            <div className="producto-historial-compra row text-center">
-                                <div className="img-producto-historial-compra col-2">
-                                    <img src={rigoBaby} alt="example" width="100px" height="100px" />
-                                </div>
-
-                                {/* ---- Información del producto ---- */}
-                                <div className="estado-envio-producto-historial-compra col-2 text-start">
-                                    <h4>Vino blanco</h4>
-                                    <h5 className="unidades-producto-historial">Vino 750cc 1 unidad</h5>
-                                </div>
-
-                                <div className="precio-total-producto-historial-compra col-2">
-                                    <h5>Precio</h5>
-                                    <h5 className="pt-2">$$$</h5>
-                                </div>
-
-                                <div className="calificacion-producto-historial-compra col-2">
-                                    <h5>Calificación del producto:</h5>
-                                    <p className="card-text text-align-center pt-1">
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-solid fa-star stars"></i>
-                                        <i className="fa-regular fa-star stars"></i>
-                                        <i className="fa-regular fa-star stars"></i>
-                                        <i className="fa-regular fa-star stars"></i>
-                                    </p>
-                                </div>
-
-                                <div className="fecha-producto-historial-compra col-2">
-                                    <h5>Comprado el:</h5>
-                                    <h5 className="pt-2">21/11/23</h5>
-                                </div>
-
-                                <div className="container-ver-pedido-historial-compra col-2">
-                                    <Link to="/producto">
-                                        <button className="btn-volver-a-comprar-historial" type="button">
-                                            Volver a comprar
-                                        </button>
-                                    </Link>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-    )
-}
-
-export default HistorialCompra
+export default HistorialCompra;

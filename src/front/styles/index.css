@@ -104,3 +104,37 @@
   object-fit: contain;
   object-position: center;
 }
+
+body { background:#fff; color:#241b18; }
+.wine-product-card { background:#fff; border:1px solid #eee5de; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; min-height:590px; box-shadow:0 8px 24px rgba(54,35,29,.07); transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease; }
+.wine-product-card:hover { transform:translateY(-7px); box-shadow:0 20px 42px rgba(54,35,29,.14); border-color:#ddcbbd; }
+.wine-product-image-frame { height:305px; padding:24px; background:#fff; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; border-bottom:1px solid #f0e8e2; }
+.wine-product-image { display:block; width:100%; height:100%; object-fit:contain; object-position:center; background:#fff; transition:transform .35s ease; }.wine-product-card:hover .wine-product-image{transform:scale(1.035)}
+.product-badges { position:absolute; z-index:2; top:14px; left:14px; right:14px; display:flex; flex-wrap:wrap; gap:6px; }
+.product-badge { border-radius:999px; padding:6px 9px; color:#fff; font-size:.68rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; box-shadow:0 4px 10px rgba(0,0,0,.12); }.product-badge-offer{background:#a51f2b}.product-badge-premium{background:#3b2a20}.product-badge-reserve{background:#9b733f}.product-badge-stock{background:#bb5c29}.product-badge-icon{background:linear-gradient(135deg,#231713,#a77c3f);border:1px solid #d7ba84}.product-badge-icon i{margin-right:3px}
+.wine-product-card-icon{border-color:#d8c092;background:linear-gradient(180deg,#fffdf8,#fff)}.wine-product-card-icon .wine-product-image-frame{background:#fff;border-bottom-color:#eadfcf}.wine-product-card-icon:hover{border-color:#ad8247;box-shadow:0 22px 50px rgba(101,72,35,.2)}
+.wine-product-body { padding:22px; text-align:left; display:flex; flex-direction:column; flex:1; }.wine-product-meta{color:#8a6d5e!important;text-transform:uppercase;letter-spacing:.09em;font-size:.7rem;font-weight:700;margin:0 0 8px}.wine-product-body h3{font-family:Georgia,serif;font-size:1.35rem;line-height:1.2;color:#2c211e;margin:0 0 8px;min-height:52px}.wine-product-detail{color:#796d67!important;font-size:.84rem;margin:0 0 14px}.wine-product-price{display:flex;align-items:baseline;gap:9px;margin-bottom:11px}.wine-product-price span{text-decoration:line-through;color:#948984;font-size:.85rem}.wine-product-price strong{color:#7b2121;font-size:1.2rem}.wine-stock{color:#48704b!important;font-size:.76rem;margin:0 0 16px}.wine-stock i{font-size:.5rem;margin-right:4px}.wine-stock-low{color:#b35a26!important}.wine-card-button{margin-top:auto;border:1px solid #7b2121;color:#7b2121;border-radius:999px;text-align:center;text-decoration:none;padding:10px 18px;font-weight:700;transition:all .2s ease}.wine-card-button:hover{background:#7b2121;color:#fff}
+.wine-skeleton{background:linear-gradient(90deg,#eee7e1 25%,#f8f5f2 50%,#eee7e1 75%);background-size:200% 100%;animation:wineSkeleton 1.35s infinite}.wine-skeleton-image{height:305px}.wine-skeleton-line{height:18px;border-radius:6px;margin-bottom:15px}.wine-skeleton-line.short{width:40%;height:11px}.wine-skeleton-line.medium{width:68%}@keyframes wineSkeleton{from{background-position:200% 0}to{background-position:-200% 0}}
+@media(max-width:600px){.wine-product-card{min-height:540px}.wine-product-image-frame{height:280px}}
+
+/* Catálogo compacto: permite ver imagen, precio, stock y acción en una sola tarjeta. */
+.wine-product-card{min-height:500px;border-radius:16px}
+.wine-product-image-frame{height:235px;padding:18px}
+.wine-product-body{padding:17px 18px}
+.wine-product-meta{margin-bottom:5px}
+.wine-product-body h3{font-size:1.2rem;min-height:42px;margin-bottom:5px}
+.wine-product-detail{margin-bottom:9px;font-size:.78rem}
+.wine-product-price{margin-bottom:7px}
+.wine-product-price strong{font-size:1.1rem}
+.wine-stock{margin-bottom:11px}
+.wine-card-button{padding:8px 16px;font-size:.88rem}
+.wine-skeleton-image{height:235px}
+@media(max-width:600px){.wine-product-card{min-height:490px}.wine-product-image-frame{height:230px}}
+
+/* Lienzo uniforme para las miniaturas de vino en vistas auxiliares. */
+.cart-item>img,
+.history-card>img,
+.wine-mini-cart-item img {
+  background:#fff;
+  object-position:center;
+}

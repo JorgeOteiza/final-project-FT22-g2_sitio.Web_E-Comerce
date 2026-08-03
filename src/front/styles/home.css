@@ -1,0 +1,26 @@
+:root { --wine:#7b2121; --wine-dark:#4b1118; --ink:#241b18; --cream:#f8f4ef; --gold:#b99055; --muted:#746964; }
+.home-page { background:#fff; color:var(--ink); }
+.wine-eyebrow { display:inline-block; color:#f0d9b7; font-size:.76rem; font-weight:700; letter-spacing:.17em; text-transform:uppercase; margin-bottom:12px; }
+.wine-eyebrow-dark { color:var(--wine); }
+.wine-section { padding:92px 24px; }
+.wine-section-heading { display:flex; align-items:end; justify-content:space-between; gap:32px; margin-bottom:38px; text-align:left; }
+.wine-section-heading h2,.wine-origin-copy h2 { color:var(--ink); font-family:Georgia,serif; font-size:clamp(2rem,4vw,3.2rem); margin:0 0 12px; }
+.wine-section-heading p { color:var(--muted); max-width:650px; margin:0; }
+.wine-text-link { color:var(--wine); text-decoration:none; font-weight:700; white-space:nowrap; }
+.wine-benefits { max-width:1140px; margin:-34px auto 0; position:relative; z-index:2; background:#fff; border-radius:16px; box-shadow:0 16px 45px rgba(43,27,22,.14); display:grid; grid-template-columns:repeat(3,1fr); padding:24px; }
+.wine-benefits>div { display:flex; align-items:center; gap:16px; padding:6px 28px; border-right:1px solid #eadfd6; text-align:left; }
+.wine-benefits>div:last-child { border:0; }.wine-benefits i{font-size:1.5rem;color:var(--wine)}.wine-benefits span{color:var(--muted);font-size:.86rem}.wine-benefits strong{display:block;color:var(--ink);font-size:.95rem;margin-bottom:2px}
+.wine-origin-section { background:var(--wine-dark); padding:78px 0; overflow:hidden; }
+.wine-origin-grid { display:grid; grid-template-columns:1.1fr .9fr; align-items:center; gap:68px; padding:0 24px; }
+.wine-origin-image { border-radius:50% 50% 12px 12px; overflow:hidden; min-height:430px; box-shadow:0 20px 50px rgba(0,0,0,.28); }
+.wine-origin-image img { width:100%; height:100%; min-height:430px; object-fit:cover; }
+.wine-origin-copy { color:#fff; text-align:left; }.wine-origin-copy h2{color:#fff}.wine-origin-copy p{color:#eaded8;line-height:1.8;margin-bottom:28px}
+.wine-terroir-section { min-height:520px; position:relative; display:flex; align-items:center; background-size:cover; background-position:center; color:#fff; overflow:hidden; }
+.wine-terroir-overlay { position:absolute; inset:0; background:linear-gradient(90deg,rgba(32,13,11,.86) 0%,rgba(49,21,15,.58) 45%,rgba(25,13,8,.1) 78%); }
+.wine-terroir-content { position:relative; z-index:1; padding:80px 24px; text-align:left; }
+.wine-terroir-content h2 { max-width:650px; margin:0 0 16px; font-family:Georgia,serif; font-size:clamp(2.5rem,5vw,4.5rem); line-height:1.02; }
+.wine-terroir-content p { max-width:580px; margin:0 0 28px; color:#f1e7df!important; font-size:1.05rem; line-height:1.75; }
+.wine-button { border:0; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; padding:13px 24px; font-weight:700; text-decoration:none; transition:transform .2s ease,box-shadow .2s ease,background .2s ease; cursor:pointer; }
+.wine-button:hover { transform:translateY(-2px); }.wine-button-primary{background:var(--wine);color:#fff;box-shadow:0 8px 20px rgba(123,33,33,.22)}.wine-button-primary:hover{background:#651a1a;color:#fff}.wine-button-outline{border:1px solid rgba(255,255,255,.7);color:#fff;background:rgba(0,0,0,.1)}.wine-button-outline:hover{background:#fff;color:var(--wine-dark)}.wine-button-light{background:#fff;color:var(--wine-dark)}
+@media(max-width:900px){.wine-benefits{margin:0;border-radius:0;grid-template-columns:1fr}.wine-benefits>div{border-right:0;border-bottom:1px solid #eadfd6}.wine-origin-grid{grid-template-columns:1fr;gap:36px}.wine-origin-image,.wine-origin-image img{min-height:320px}.wine-section{padding:68px 20px}}
+@media(max-width:600px){.wine-section-heading{align-items:start;flex-direction:column}.wine-benefits>div{padding:14px}.wine-origin-section{padding:55px 0}.wine-terroir-section{min-height:470px;background-position:58% center}.wine-terroir-overlay{background:linear-gradient(90deg,rgba(30,12,10,.88),rgba(35,16,12,.42))}.wine-terroir-content{padding:64px 20px}}

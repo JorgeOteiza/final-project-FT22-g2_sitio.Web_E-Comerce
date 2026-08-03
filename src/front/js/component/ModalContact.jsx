@@ -1,113 +1,73 @@
-import React, { useState, useRef } from 'react';
-import bgHero from "../../img/background-hero.jpeg";
-import emailjs from '@emailjs/browser';
+import React, { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
+import contactImage from "../../img/barriles-concha-y-toro.webp";
 
+const initialForm = { name: "", lastName: "", email: "", phone: "", message: "" };
 
 const ModalContact = () => {
+  const [formData, setFormData] = useState(initialForm);
+  const [status, setStatus] = useState("idle");
+  const [error, setError] = useState("");
+  const formRef = useRef();
 
-    const [formData, setFormData] = useState({
-        name: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        message: ''
-    });
-
-    const [formSubmitted, setFormSubmitted] = useState(false);
-    const [showClosingModal, setShowClosingModal] = useState(false);
-
-    const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+  const handleInputChange = event => setFormData(current => ({ ...current, [event.target.name]: event.target.value }));
+  const handleSubmit = async event => {
+    event.preventDefault();
+    setError("");
+    if (Object.values(formData).some(value => !value.trim())) {
+      setError("Completa todos los campos para poder enviar tu mensaje.");
+      return;
     }
-    const refForm = useRef();
-
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!formData.name || !formData.lastName || !formData.email || !formData.phone || !formData.message) {
-            alert('Todos los campos son obligatorios');
-            return;
-        } else {
-            const serviceID = 'service_n8cz62t';
-            const templateID = 'template_i86ecfx';
-            const api_public_key = 'kdu6P43r16fPHQoUu';
-
-            emailjs.sendForm(serviceID, templateID, refForm.current, api_public_key)
-                .then(result => console.log(result.text))
-                .catch(error => console.error(error))
-        }
-
-        setFormSubmitted(true);
-
-        setTimeout(() => {
-            setShowClosingModal(true);
-        }, 3000);
+    setStatus("sending");
+    try {
+      await emailjs.sendForm("service_n8cz62t", "template_i86ecfx", formRef.current, "kdu6P43r16fPHQoUu");
+      setStatus("success");
+      setFormData(initialForm);
+    } catch (_) {
+      setStatus("idle");
+      setError("No pudimos enviar el mensaje. Inténtalo nuevamente en unos minutos.");
     }
+  };
 
-    return (
-        <>
-            {/* MODAL */}
-            <div className="modal fade" id="ModalContact" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog odal-dialog-centered modal-xl">
-                    <div className="modal-content">
-                        {/* Botón "X" para cerrar el modal en pantallas pequeñas */}
-                        <button
-                            type="button"
-                            className="btn-close d-lg-none" // Oculta el botón en pantallas grandes y lo muestra en pantallas pequeñas
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        ></button>
-                        <div className="modal-body text-dark">
-                            <div className="row p-3">
-                                <div className="col-lg-4 col-md-6">
-                                    <img src={bgHero} alt="example" width="100%" height="100%" className="rounded" />
-                                </div>
-
-                                <form ref={refForm} onSubmit={handleSubmit} className='col-lg-8 col-md-6 container-inputs-contact'>
-                                    {!formSubmitted ? (
-                                        <>
-                                            <div className="row">
-                                                <h1 className="text-center">Contáctenos:</h1>
-                                                <div className="col-6">
-                                                    <input name="name" value={formData.name} onChange={handleInputChange} className="input-form-contact" type="text" placeholder="Nombre" required />
-                                                </div>
-                                                <div className="col-6">
-                                                    <input name="lastName" value={formData.lastName} onChange={handleInputChange} className="input-form-contact" type="text" placeholder="Apellido" required />
-                                                </div>
-                                            </div>
-                                            <input name="email" value={formData.email} onChange={handleInputChange} className="input-form-contact" type="email" placeholder="Email" required />
-                                            <input name="phone" value={formData.phone} onChange={handleInputChange} className="input-form-contact input-form-contact-number" type="number" placeholder="Teléfono" required />
-                                            <textarea value={formData.message} onChange={handleInputChange} className="input-form-contact" name="message" id="textareaContact" cols="20" rows="4"></textarea>
-                                            <button type="submit" className="btn-enviar-formulario-contactanos">Enviar</button>
-                                        </>
-
-                                    ) : (
-                                        <div className='mensaje-enviado-modal-contact'><h4 className='texto-mensaje-enviado-modal'>Mensaje enviado!</h4></div>
-                                    )
-                                    }
-                                </form>
-                            </div>
-                        </div>
-                        {showClosingModal && (
-                            <div className="modal-footer">
-                                <button
-                                    onClick={() => setShowClosingModal(false)}
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                > Cerrar
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div >
-            </div >
-        </>
-    )
-}
+  return (
+    <div className="modal fade wine-contact-modal" id="ModalContact" tabIndex="-1" aria-labelledby="contactTitle" aria-hidden="true">
+      <div className="modal-dialog modal-dialog-centered modal-xl">
+        <div className="modal-content">
+          <button type="button" className="btn-close wine-modal-close" data-bs-dismiss="modal" aria-label="Cerrar" />
+          <div className="wine-contact-layout">
+            <aside className="wine-contact-aside" style={{ backgroundImage: `url(${contactImage})` }}>
+              <div>
+                <span className="wine-eyebrow">Hablemos</span>
+                <h2>¿Necesitas ayuda para elegir?</h2>
+                <p>Cuéntanos qué buscas y te ayudaremos a encontrar un vino para ese momento especial.</p>
+              </div>
+              <ul><li><i className="fa-regular fa-envelope" /> elrincondelvino14@gmail.com</li><li><i className="fa-regular fa-clock" /> Respuesta dentro de 24 horas</li></ul>
+            </aside>
+            <section className="wine-contact-form-wrap">
+              {status === "success" ? (
+                <div className="wine-contact-success"><i className="fa-regular fa-circle-check" /><span className="wine-eyebrow wine-eyebrow-dark">Mensaje enviado</span><h2>Gracias por escribirnos</h2><p>Recibimos tu consulta y responderemos lo antes posible.</p><button className="wine-button wine-button-primary" data-bs-dismiss="modal" onClick={() => setStatus("idle")}>Cerrar</button></div>
+              ) : (
+                <form ref={formRef} onSubmit={handleSubmit}>
+                  <span className="wine-eyebrow wine-eyebrow-dark">Contacto</span>
+                  <h1 id="contactTitle">Conversemos sobre vinos</h1>
+                  <p className="wine-contact-intro">Completa el formulario y responderemos tu consulta.</p>
+                  <div className="wine-contact-fields">
+                    <label><span>Nombre</span><input name="name" value={formData.name} onChange={handleInputChange} autoComplete="given-name" /></label>
+                    <label><span>Apellido</span><input name="lastName" value={formData.lastName} onChange={handleInputChange} autoComplete="family-name" /></label>
+                    <label className="full"><span>Correo electrónico</span><input name="email" type="email" value={formData.email} onChange={handleInputChange} autoComplete="email" /></label>
+                    <label className="full"><span>Teléfono</span><input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} autoComplete="tel" /></label>
+                    <label className="full"><span>Mensaje</span><textarea name="message" rows="5" value={formData.message} onChange={handleInputChange} placeholder="¿En qué podemos ayudarte?" /></label>
+                  </div>
+                  {error && <p className="wine-form-error" role="alert"><i className="fa-solid fa-circle-exclamation" /> {error}</p>}
+                  <button type="submit" className="wine-button wine-button-primary wine-contact-submit" disabled={status === "sending"}>{status === "sending" ? "Enviando…" : "Enviar mensaje"}</button>
+                </form>
+              )}
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ModalContact;

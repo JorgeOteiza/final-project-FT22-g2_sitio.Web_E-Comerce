@@ -1,83 +1,29 @@
-import React, { useState } from "react";
-import rigoBaby from "../../img/rigo-baby.jpg"
-import vinoFavoritos from "../../img/vino-add-favorites.png"
-import vinoQuitarFavoritos from "../../img/vino-modified 1.png"
-
-import "../../styles/favoritos.css";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { Context } from "../store/appContext";
+import { Card } from "../component/Card.jsx";
+import "../../styles/favoritos.css";
 
 const Favoritos = () => {
-
-    const [favorito, setFavorito] = useState(false);
-
-    const handleAddFavorites = () => {
-        setFavorito(!favorito);
-    }
-
-    return (
-        <>
-            {/* ---- // HISTORIAL DE PRODUCTOS // ---- */}
-            <div className="container-favoritos">
-
-                {/* BARRA DE BÚSQUEDA PRODUCTOS */}
-                <form className="container-input-search-favoritos">
-                    <input className="input-search-favoritos" type="search" placeholder="Próximamente podrás buscar entre tus compras!" />
-                </form>
-
-                {/* ---- // PRODUCTO HISTORIAL // ----' */}
-                <div className="container-contenido-favoritos">
-                    <div className="producto-favoritos row text-center">
-                        <h1>Próximamente podrás añadir tus vinos favoritos a tu lista!</h1>
-                        {/* <div className="img-producto-historial-compra col-2"> */}
-                        {/* <img src={rigoBaby} alt="example" width="100px" height="100px" /> */}
-                        {/* </div> */}
-                        {/*  */}
-                        {/* ---- Descripción producto ---- */}
-                        {/* <div className="col-2 text-start"> */}
-                        {/* <h4>Vino tinto</h4> */}
-                        {/* <h5 className="unidades-producto-favoritos">Vino 750cc 1 unidad</h5> */}
-                        {/* </div> */}
-                        {/*  */}
-                        {/* ---- Precio ---- */}
-                        {/* <div className="col-2"> */}
-                        {/* <h5>Precio</h5> */}
-                        {/* <h5 className="pt-2">$$$</h5> */}
-                        {/* </div> */}
-                        {/*  */}
-                        {/* ---- Calificación ---- */}
-                        {/* <div className="calificacion-producto-favoritos col-2"> */}
-                        {/* <h5>Calificación del producto:</h5> */}
-                        {/* <p className="card-text text-align-center pt-1"> */}
-                        {/* <i className="fa-solid fa-star stars"></i> */}
-                        {/* <i className="fa-solid fa-star stars"></i> */}
-                        {/* <i className="fa-solid fa-star stars"></i> */}
-                        {/* <i className="fa-solid fa-star stars"></i> */}
-                        {/* <i className="fa-regular fa-star stars"></i> */}
-                        {/* </p> */}
-                        {/* </div> */}
-                        {/*  */}
-                        {/* ---- Añadir o quitar de favoritos ---- */}
-                        {/* <div className="col-2 contenedor-img-favoritos"> */}
-                        {/* <button type="button" className="btn-add-favorites" onClick={handleAddFavorites}> */}
-                        {/* <img className="add-favorites-img" src={favorito ? vinoQuitarFavoritos : vinoFavoritos} alt="add-favorites" width="100px" height="100px" /> */}
-                        {/* </button> */}
-                        {/* </div> */}
-                        {/*  */}
-                        {/* ---- Comprar producto ---- */}
-                        {/* <div className="col-2"> */}
-                        {/* <Link to="/producto"> */}
-                        {/* <button className="btn-comprar-producto-favoritos" type="button"> */}
-                        {/* Comprar */}
-                        {/* </button> */}
-                        {/* </Link> */}
-                        {/* </div> */}
-                    </div>
-                </div>
-
-            </div>
-
-        </>
-    )
-}
+  const { store } = useContext(Context);
+  const favorites = store.favorites || [];
+  return (
+    <main className="container favorites-page">
+      <header className="wine-catalog-header">
+        <span className="wine-eyebrow wine-eyebrow-dark">Tu selección</span>
+        <h1>Vinos favoritos</h1>
+        <p>Guarda aquí las etiquetas que quieres volver a encontrar.</p>
+      </header>
+      {favorites.length ? <div className="row g-4"><Card productos={favorites} /></div> : (
+        <div className="wine-empty-state">
+          <i className="fa-regular fa-heart" />
+          <h2>Aún no tienes favoritos</h2>
+          <p>Explora el catálogo y guarda los vinos que más te interesen.</p>
+          <Link className="wine-button wine-button-primary" to="/busqueda?q=">Explorar vinos</Link>
+        </div>
+      )}
+    </main>
+  );
+};
 
 export default Favoritos;

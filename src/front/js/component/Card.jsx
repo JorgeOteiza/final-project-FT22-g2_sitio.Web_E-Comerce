@@ -1,140 +1,98 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "/src/front/styles/index.css";
 import { apiFetch } from "../services/api";
 
-const formatPrice = (price) => new Intl.NumberFormat("es-CL", {
-  style: "currency",
-  currency: "CLP",
-  maximumFractionDigits: 0,
-}).format(price);
+export const formatPrice = price => new Intl.NumberFormat("es-CL", {
+  style: "currency", currency: "CLP", maximumFractionDigits: 0,
+}).format(price || 0);
 
-function handleResetCategories() {
-  setTimeout(() => {
-    window.location.reload(false)
-  }, 1);
-}
+const discountPercent = product => product.precio_oferta
+  ? Math.round((1 - product.precio_oferta / product.precio) * 100)
+  : 0;
 
-const Card = ({ productos }) => (
+const isLimitedAllocation = product => product.nombre?.toLowerCase().includes("almaviva");
+
+const resetDocumentScroll = () => {
+  document.getElementById("page-top")?.scrollIntoView({ block: "start", behavior: "auto" });
+  if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+  window.scrollTo(0, 0);
+};
+
+const ProductBadges = ({ product }) => (
+  <div className="product-badges">
+    {product.precio_oferta >= 200000 && <span className="product-badge product-badge-icon"><i className="fa-solid fa-gem" /> Vino ícono</span>}
+    {product.precio_oferta && <span className="product-badge product-badge-offer">-{discountPercent(product)}%</span>}
+    {product.categoria?.toLowerCase() === "premium" && product.precio_oferta < 200000 && <span className="product-badge product-badge-premium">Premium</span>}
+    {product.categoria?.toLowerCase() === "gran reserva" && <span className="product-badge product-badge-reserve">Gran reserva</span>}
+    {product.stock > 0 && product.stock <= 5 && !isLimitedAllocation(product) && <span className="product-badge product-badge-stock">Últimas unidades</span>}
+  </div>
+);
+
+const Card = ({ productos = [] }) => (
   <>
-    {productos.map((producto) => (
-      <div key={producto.id} className="col-12 col-md-6 col-lg-3">
-        <div className="my-5 d-flex justify-content-center " >
-          <div className="card-product bg-light text-center" style={{ width: "100%", maxWidth: "300px", minHeight: "625px" }} >
-            <div className="m-4 position-relative catalog-product-image-frame">
-              {producto.precio_oferta && (
-                <span className="badge bg-danger position-absolute top-0 start-0">Oferta</span>
-              )}
-              <img
-                className="card-img-top img-fluid catalog-product-image"
-                src={`${producto.image}`}
-                alt={`${producto.nombre}`}
-              />
-            </div>
-            <div className="card-body text-align-center" style={{ overflow: "hidden" }}>
-              <h4 className="card-title custom-text-card" title={`${producto.nombre}`}>
-                {producto.nombre.length > 19 ? `${producto.nombre.substring(0, 19)}...` : producto.nombre}
-              </h4>
-              <p className="text-secondary mb-1">{producto.marca}</p>
+    {productos.map(producto => (
+      <div key={producto.id} className="col-12 col-sm-6 col-lg-3 d-flex">
+        <article className={`wine-product-card w-100 ${producto.precio_oferta >= 200000 ? "wine-product-card-icon" : ""}`}>
+          <Link className="wine-product-image-frame" to={`/producto/${producto.id}`} onClick={resetDocumentScroll} aria-label={`Ver ${producto.nombre}`}>
+            <ProductBadges product={producto} />
+            <img className="wine-product-image" src={producto.image} alt={producto.nombre} loading="lazy" />
+          </Link>
+          <div className="wine-product-body">
+            <p className="wine-product-meta">{producto.marca}</p>
+            <h3 title={producto.nombre}>{producto.nombre}</h3>
+            <p className="wine-product-detail">{producto.cepa} · {producto.unitFormat}</p>
+            <div className="wine-product-price">
               {producto.precio_oferta ? (
-                <div>
-                  <span className="text-secondary text-decoration-line-through me-2">
-                    {formatPrice(producto.precio)}
-                  </span>
-                  <strong className="text-danger h5">{formatPrice(producto.precio_oferta)}</strong>
-                </div>
-              ) : (
-                <h5>{formatPrice(producto.precio)}</h5>
-              )}
-              <p className="card-text text-align-center">
-                <i className="fa-solid fa-star stars"></i>
-                <i className="fa-solid fa-star stars"></i>
-                <i className="fa-solid fa-star stars"></i>
-                <i className="fa-solid fa-star stars"></i>
-                <i className="fa-regular fa-star stars"></i>
-              </p>
-              <Link to={`/producto/${producto.id}`}>
-                <button className="btn custom-btn-card rounded-pill" onClick={handleResetCategories}>
-                  Ver producto
-                </button>
-              </Link>
+                <><span>{formatPrice(producto.precio)}</span><strong>{formatPrice(producto.precio_oferta)}</strong></>
+              ) : <strong>{formatPrice(producto.precio)}</strong>}
             </div>
+            <p className={`wine-stock ${producto.stock <= 5 && !isLimitedAllocation(producto) ? "wine-stock-low" : ""}`}>
+              <i className="fa-solid fa-circle" /> {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
+            </p>
+            <Link className="wine-card-button" to={`/producto/${producto.id}`} onClick={resetDocumentScroll}>Ver producto</Link>
           </div>
-        </div>
+        </article>
       </div>
     ))}
   </>
 );
 
-const CardContainer4 = () => {
+const ProductCardSkeleton = () => (
+  <div className="col-12 col-sm-6 col-lg-3">
+    <div className="wine-product-card wine-skeleton-card" aria-hidden="true">
+      <div className="wine-skeleton wine-skeleton-image" />
+      <div className="wine-product-body">
+        <div className="wine-skeleton wine-skeleton-line short" />
+        <div className="wine-skeleton wine-skeleton-line" />
+        <div className="wine-skeleton wine-skeleton-line medium" />
+      </div>
+    </div>
+  </div>
+);
+
+const useProducts = endpoint => {
   const [productos, setProductos] = useState([]);
-  const cantidadVisible = 4;
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    apiFetch("/productos")
-      .then((data) => setProductos(data))
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+    apiFetch(endpoint).then(setProductos).catch(() => setProductos([])).finally(() => setLoading(false));
+  }, [endpoint]);
+  return { productos, loading };
+};
 
-  return <Card productos={productos.slice(0, cantidadVisible)} />;
+const CardContainer4 = () => {
+  const { productos, loading } = useProducts("/productos");
+  return loading ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />) : <Card productos={productos.slice(0, 4)} />;
 };
 
 const CardContainer16 = ({ tipo }) => {
-  const [productos, setProductos] = useState([]);
-  const [cantidadVisible, setCantidadVisible] = useState(16);
-
-  useEffect(() => {
-    apiFetch(`/productos/tipo/${tipo}`)
-      .then((data) => setProductos(data))
-      .catch((error) => console.error("Error fetching data:", error));
-    console.log("Error en el card16, tipo de vino", tipo)
-  }, [tipo]);
-
-  return (
-    <div className="row">
-      <Card productos={productos.slice(0, cantidadVisible)} />
-      {productos.length > cantidadVisible && (
-        <div className="col-12 d-flex justify-content-center mt-3">
-          <button
-            className="button-ver-mas-productos"
-            onClick={() => setCantidadVisible(cantidadVisible + 16)}
-          >
-            Ver más
-          </button>
-        </div>
-      )}
-
-    </div>
-  );
+  const { productos, loading } = useProducts(`/productos/tipo/${tipo}`);
+  return loading ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />) : <Card productos={productos.slice(0, 16)} />;
 };
 
 const CardFilterCategoria = ({ categoria }) => {
-  const [productos, setProductos] = useState([]);
-  const [cantidadVisible, setCantidadVisible] = useState(16);
-
-  useEffect(() => {
-    apiFetch(`/productos/categoria/${categoria}`)
-      .then((data) => setProductos(data))
-      .catch((error) => console.error("Error fetching data:", error));
-    console.log("Error en el card16, productos", categoria)
-  }, [categoria]);
-
-  return (
-    <div className="row">
-      <Card productos={productos.slice(0, cantidadVisible)} />
-      {productos.length > cantidadVisible && (
-        <div className="col-12 d-flex justify-content-center mt-3">
-          <button
-            className="button-ver-mas-productos"
-            onClick={() => setCantidadVisible(cantidadVisible + 16)}
-          >
-            Ver más
-          </button>
-        </div>
-      )}
-
-    </div>
-  );
+  const { productos, loading } = useProducts(`/productos/categoria/${categoria}`);
+  return loading ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />) : <Card productos={productos.slice(0, 16)} />;
 };
 
-export { CardContainer4, CardFilterCategoria, CardContainer16, Card};
+export { Card, ProductCardSkeleton, CardContainer4, CardFilterCategoria, CardContainer16 };

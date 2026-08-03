@@ -1,59 +1,10 @@
-.custom-btn-filter {
-    width: 100%;
-    border-radius: 0%;
-    color: rgb(46, 45, 45);
-    border: 0;
-    text-align: left;
-    padding-left: 20px;
-}
-
-.background-filter-color {
-    background: #acacac solid;
-}
-
-.filter-title {
-    color: white;
-    background-color: rgb(46, 45, 45);
-}
-
-.background-filteredproduct-color {
-    background-color: whitesmoke;
-}
-
-.custom-text-filterproduct {
-    color: black
-}
-
-.filter-custom-height {
-    height: 40px;
-    font-size: 25px;
-}
-
-.custom-card-filter {
-    border-radius: 0;
-    background-color: #acacac solid;
-}
-
-.filter-container {
-    font-size: 13px;
-    margin: auto;
-    border-radius: 0;
-    background-color: #acacac solid;
-}
-
-.filter-item {
-    width: 100%;
-    text-decoration: none;
-    color: rgb(46, 45, 45);
-    background: #acacac solid;
-}
-
-.orderbar-color {
-    background-color: rgb(46, 45, 45);
-    color: white;
-}
-
-.orderbar-color:hover {
-    background-color: rgb(46, 45, 45);
-    color: white;
-}
+.wine-catalog-page,.favorites-page,.cart-page { min-height:68vh; padding:72px 24px 90px; }
+.wine-catalog-header { text-align:left; margin-bottom:36px; }.wine-catalog-header h1{font-family:Georgia,serif;font-size:clamp(2.4rem,5vw,4rem);color:#241b18;margin:0 0 8px}.wine-catalog-header p{color:#746964;margin:0}
+.wine-filter-panel { display:grid; grid-template-columns:1.7fr repeat(5,1fr) auto; gap:12px; align-items:end; background:#f8f4ef; border:1px solid #eadfd6; border-radius:16px; padding:20px; margin-bottom:42px; }
+.wine-filter-panel label{display:flex;flex-direction:column;gap:7px;text-align:left;color:#5d514c;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.wine-filter-panel input,.wine-filter-panel select{height:44px;border:1px solid #d9ccc2;border-radius:9px;background:#fff;padding:0 12px;color:#2c211e;outline:none}.wine-filter-panel input:focus,.wine-filter-panel select:focus{border-color:#7b2121;box-shadow:0 0 0 3px rgba(123,33,33,.1)}
+.wine-filter-clear{height:44px;border:0;background:transparent;color:#7b2121;font-weight:700;padding:0 12px}.wine-empty-state{grid-column:1/-1;min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#faf7f3;border:1px dashed #d8c9bd;border-radius:20px;padding:48px}.wine-empty-state>i{font-size:3rem;color:#a38778;margin-bottom:22px}.wine-empty-state h1,.wine-empty-state h2{font-family:Georgia,serif;color:#2c211e}.wine-empty-state p{color:#746964;max-width:450px;margin-bottom:24px}
+@media(max-width:1200px){.wine-filter-panel{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.wine-filter-panel{grid-template-columns:1fr}.wine-catalog-page,.favorites-page,.cart-page{padding:48px 16px 70px}}
+.wine-catalog-page{padding-top:46px}
+.wine-catalog-page .wine-catalog-header{margin-bottom:24px}
+.wine-catalog-page .wine-catalog-header h1{font-size:clamp(2.2rem,4vw,3.35rem)}
+.wine-catalog-page .wine-filter-panel{padding:16px;margin-bottom:28px}

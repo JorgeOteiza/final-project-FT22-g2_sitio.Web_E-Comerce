@@ -22,6 +22,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			token: localStorage.getItem("token"),
 			product: {},
 			shoppingCart: JSON.parse(window.localStorage.getItem("shoppingCart")) || [],
+			favorites: JSON.parse(window.localStorage.getItem("favorites")) || [],
 
 			//productos
 			search: "",
@@ -98,15 +99,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 					shoppingCart
 				})
 			},
+			toggleFavorite: (product) => {
+				const favorites = getStore().favorites || [];
+				const exists = favorites.some(item => item.id === product.id);
+				const updated = exists ? favorites.filter(item => item.id !== product.id) : [...favorites, product];
+				window.localStorage.setItem("favorites", JSON.stringify(updated));
+				setStore({ favorites: updated });
+				return !exists;
+			},
 			clearShoppingCart: () => {
-				setStore(prevState => ({ ...prevState, shoppingCart: [] }));
+				window.localStorage.setItem("shoppingCart", JSON.stringify([]));
+				setStore({ shoppingCart: [] });
 			},
 			updateShoppingCart: (nombre, newCantidad) => {
-				const updatedShoppingCart = store.shoppingCart.map(item =>
+				const updatedShoppingCart = getStore().shoppingCart.map(item =>
 					item.nombre === nombre ? { ...item, cantidad: newCantidad } : item
 				);
 
-				actions.setShoppingCart(updatedShoppingCart);
+				getActions().setShoppingCart(updatedShoppingCart);
 			},
 			fetchProduct: async (id) => {
 				const product = await apiFetch(`/productos/${id}`)
