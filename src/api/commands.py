@@ -34,7 +34,7 @@ CATALOG_PRODUCTS = [
         "nombre": "Montes Alpha Carménère", "marca": "Valle de Colchagua",
         "tipo": "tinto", "cepa": "Carménère", "categoria": "premium",
         "unitFormat": "Botella 750 ml", "precio": 16290, "precio_oferta": 13032,
-        "stock": 12,
+        "stock": 6,
         "descripcion": "Aromas intensos a frutos negros, especias, chocolate amargo y roble; cuerpo medio-alto, taninos redondos y final largo.",
         "image": "/montes-alpha-carmenere.webp",
     },
@@ -113,9 +113,17 @@ CATALOG_PRODUCTS = [
         "nombre": "Don Melchor Cabernet Sauvignon", "marca": "Concha y Toro - Viña Don Melchor",
         "tipo": "tinto", "cepa": "Cabernet Sauvignon", "categoria": "premium",
         "unitFormat": "Botella 750 ml", "precio": 299990, "precio_oferta": 276990,
-        "stock": 12,
+        "stock": 6,
         "descripcion": "Aromas a frutas negras maduras, chocolate y especias. Estructura elegante, taninos sedosos y final largo; ideal con carnes rojas, cordero o quesos maduros.",
         "image": "/don-melchor-cabernet.webp",
+    },
+    {
+        "nombre": "Almaviva 2022", "marca": "Concha y Toro", "tipo": "tinto",
+        "cepa": "72% Cabernet Sauvignon, 23% Carménère, 4% Cabernet Franc y 1% Petit Verdot",
+        "categoria": "premium", "unitFormat": "Botella 750 ml", "precio": 500000,
+        "precio_oferta": 469000, "stock": 3,
+        "descripcion": "Vino de gran complejidad, elegancia y delicadeza, con aromas a grosellas negras, lavanda y grafito.",
+        "image": "/almaviva-2022.webp",
     },
 ]
 

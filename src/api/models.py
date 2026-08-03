@@ -132,6 +132,8 @@ class Favorito(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "producto_id": self.producto_id,
+            "producto": self.producto.serialize() if self.producto else None,
         }
 
     def save(self):
@@ -385,6 +387,8 @@ class HistorialCompra(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "producto_id": self.producto_id,
+            "producto": self.producto.serialize() if self.producto else None,
         }
 
     def save(self):

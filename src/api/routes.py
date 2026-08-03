@@ -81,6 +81,18 @@ def get_all_products_by_category(categoria):
     productos = Producto.query.filter_by(categoria=categoria)
     return jsonify([category.serialize() for category in productos])
 
+@api.route('/users/me', methods=['GET', 'DELETE'])
+@jwt_required()
+def current_user():
+    user = User.query.get(int(get_jwt_identity()))
+    if user is None:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+    if request.method == 'DELETE':
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message': 'Usuario eliminado exitosamente'}), 200
+    return jsonify(user.serialize()), 200
+
 # RUTA LISTA
 @api.route('/users/<int:user_id>', methods=['GET', 'DELETE'])
 @jwt_required()

@@ -21,7 +21,14 @@ export const apiFetch = async (path, options = {}) => {
 
     if (!response.ok) {
         const message = data?.message || data?.error || "No se pudo completar la solicitud";
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+        if (response.status === 401 && token) {
+            window.localStorage.removeItem("token");
+            window.localStorage.removeItem("user_id");
+            window.dispatchEvent(new Event("auth-expired"));
+        }
+        throw error;
     }
 
     return data;
