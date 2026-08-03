@@ -1,37 +1,30 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 
 import { Home } from "./pages/home";
-import { Search } from "./pages/search";
 import injectContext from "./store/appContext";
 
 import Navbar from "./component/Navbar.jsx";
 import Footer from "./component/footer.jsx";
-import Carrito from "./pages/carrito.jsx";
-import Registro from "./pages/registro.jsx";
-import PerfilUsuario from "./pages/perfilUsuario.js";
-import Single from "./pages/single.js";
-import Favoritos from "./pages/favoritos.jsx";
-import HistorialCompra from "./pages/historialCompra.jsx";
-import Reset_password from "./pages/reset_password.jsx";
-
-
-import DetallesPedido from "./pages/DetallesPedido.jsx";
-import MetodoDePago from "./pages/metodoDePago.jsx";
-
-import MetodoDePagoRevisar from "./pages/metodoDePagoRevisar.jsx";
 import { MetodoPagoProvider } from "./component/ContextPago.jsx";
-import { Cloudinary } from "@cloudinary/url-gen";
-import Filteredproduct from "./component/FIlteredproduct.jsx";
-import BarraDeBusqueda from "./component/BarraDeBusqueda.jsx";
 import PrivateRoute from "./component/PrivateRoute.jsx";
-import Direccion from "./component/Direccion.jsx";
+
+const Search = lazy(() => import("./pages/search").then(module => ({ default: module.Search })));
+const Carrito = lazy(() => import("./pages/carrito.jsx"));
+const Registro = lazy(() => import("./pages/registro.jsx"));
+const PerfilUsuario = lazy(() => import("./pages/perfilUsuario.js"));
+const Single = lazy(() => import("./pages/single.js"));
+const Favoritos = lazy(() => import("./pages/favoritos.jsx"));
+const HistorialCompra = lazy(() => import("./pages/historialCompra.jsx"));
+const ResetPassword = lazy(() => import("./pages/reset_password.jsx"));
+const DetallesPedido = lazy(() => import("./pages/DetallesPedido.jsx"));
+const MetodoDePago = lazy(() => import("./pages/metodoDePago.jsx"));
+const MetodoDePagoRevisar = lazy(() => import("./pages/metodoDePagoRevisar.jsx"));
+const Direccion = lazy(() => import("./component/Direccion.jsx"));
 //create your first component
 const Layout = () => {
-    const cld = new Cloudinary({ cloud: { cloudName: 'dipd6csl7' } });
-
     //the basename is used when your project is published in a subdirectory and not in the root of the domain
     // you can set the basename on the .env file located at the root of this project, E.g: BASENAME=/react-hello-webapp/
     const basename = "/";
@@ -45,6 +38,7 @@ const Layout = () => {
                     <ScrollToTop>
                         <div id="page-top" aria-hidden="true" />
                         <Navbar />
+                        <Suspense fallback={<main className="container wine-loading-state" aria-live="polite">Cargando contenido…</main>}>
                         <Routes>
                             <Route element={<Home />} path="/" />
                             <Route element={
@@ -96,10 +90,11 @@ const Layout = () => {
 
                             <Route element={
 
-                                <Reset_password />
+                                <ResetPassword />
 
                             } path="/reset_password" />
                         </Routes>
+                        </Suspense>
                         <Footer />
                     </ScrollToTop>
                 </BrowserRouter>

@@ -19,7 +19,7 @@ export const NavBarShoppingCart = () => {
       <div className="dropdown-menu dropdown-menu-end wine-dropdown wine-mini-cart">
         <div className="wine-mini-cart-header"><strong>Tu carrito</strong><span>{units} {units === 1 ? "unidad" : "unidades"}</span></div>
         {cart.length ? <>
-          <div className="wine-mini-cart-items">{cart.slice(0, 3).map((item, index) => <div className="wine-mini-cart-item" key={`${item.nombre}-${index}`}><img src={item.image} alt="" /><div><strong>{item.nombre}</strong><span>{item.cantidad} × {formatPrice(item.precio)}</span></div><b>{formatPrice(item.precio * item.cantidad)}</b></div>)}</div>
+          <div className="wine-mini-cart-items">{cart.slice(0, 3).map((item, index) => <div className="wine-mini-cart-item" key={`${item.nombre}-${index}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><strong>{item.nombre}</strong><span>{item.cantidad} × {formatPrice(item.precio)}</span></div><b>{formatPrice(item.precio * item.cantidad)}</b></div>)}</div>
           {cart.length > 3 && <p className="wine-mini-cart-more">Y {cart.length - 3} productos más</p>}
           <div className="wine-mini-cart-total"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
           <Link className="wine-button wine-button-primary" to="/carrito">Ver carrito</Link>

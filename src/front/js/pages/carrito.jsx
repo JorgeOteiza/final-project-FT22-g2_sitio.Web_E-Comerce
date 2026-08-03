@@ -34,7 +34,7 @@ const Carrito = () => {
         <section className="cart-items" aria-label="Productos del carrito">
           {products.map((product, index) => (
             <article className="cart-item" key={`${product.nombre}-${index}`}>
-              <img src={product.image} alt={product.nombre} />
+              <img src={product.image} alt={product.nombre} loading="lazy" decoding="async" />
               <div className="cart-item-info"><h2>{product.nombre}</h2><p>{product.tipo} · {product.unitFormat || "750 ml"}</p><button className="cart-remove" onClick={() => remove(index)}><i className="fa-regular fa-trash-can" /> Eliminar producto</button></div>
               <div className="cart-quantity"><button onClick={() => updateQuantity(index, -1)} aria-label="Reducir cantidad">−</button><span>{product.cantidad}</span><button onClick={() => updateQuantity(index, 1)} aria-label="Aumentar cantidad">+</button></div>
               <strong>{formatPrice(product.precio * product.cantidad)}</strong>

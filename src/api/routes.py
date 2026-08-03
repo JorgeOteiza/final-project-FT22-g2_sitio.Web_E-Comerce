@@ -172,7 +172,7 @@ def get_products_by_search(busqueda):
 @jwt_required()
 def get_historial():
     user_id = int(get_jwt_identity())
-    if User.query.get(user_id) is None:
+    if db.session.get(User, user_id) is None:
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
     if request.method == 'POST':
@@ -181,7 +181,7 @@ def get_historial():
 
         if not producto_id:
             return jsonify({'message': 'producto_id is required'}), 400
-        if Producto.query.get(producto_id) is None:
+        if db.session.get(Producto, producto_id) is None:
             return jsonify({'message': 'Producto no encontrado'}), 404
 
         historial_compra = HistorialCompra(producto_id=producto_id, user_id=user_id)

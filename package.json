@@ -1,28 +1,21 @@
 {
-	"name": "react-hello-webapp",
+	"name": "el-rincon-del-vino",
 	"engines": {
-		"node": "16.x"
+		"node": ">=20"
 	},
 	"version": "1.0.1",
-	"description": "",
+	"description": "E-commerce full stack de vinos con React, Flask y PostgreSQL.",
 	"main": "index.js",
 	"scripts": {
 		"dev": "webpack-dev-server --config webpack.dev.js --port 3000",
 		"start": "webpack-dev-server --config webpack.dev.js --port 3000",
 		"build": "webpack --config webpack.prod.js"
 	},
-	"author": {
-		"name": "Alejandro Sanchez",
-		"url": "http://alesanchezr.com/"
-	},
+	"author": "Equipo original del proyecto final de 4Geeks Academy",
 	"contributors": [
 		{
-			"name": "Alejandro Sanchez",
-			"url": "http://alesanchezr.com/"
-		},
-		{
-			"name": "Ignacio Cordoba",
-			"url": "http://github.com/nachovz"
+			"name": "Jorge Oteiza",
+			"url": "https://github.com/JorgeOteiza"
 		}
 	],
 	"license": "ISC",

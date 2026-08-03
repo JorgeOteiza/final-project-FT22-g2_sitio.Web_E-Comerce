@@ -1,0 +1,38 @@
+name: Calidad del proyecto
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Pruebas del backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar Pipenv
+        run: pip install pipenv
+      - name: Instalar dependencias
+        run: pipenv sync --dev
+      - name: Ejecutar pruebas
+        run: pipenv run python -m unittest discover -s tests -v
+
+  frontend:
+    name: Compilación del frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci --legacy-peer-deps
+      - name: Compilar aplicación
+        run: npm run build

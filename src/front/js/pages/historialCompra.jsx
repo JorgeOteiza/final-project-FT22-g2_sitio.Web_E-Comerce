@@ -22,7 +22,7 @@ const HistorialCompra = () => {
           const product = item.producto;
           return <article className="history-card" key={item.id}>
             <div className="history-number"><span>Compra</span><strong>#{String(item.id).padStart(4,"0")}</strong></div>
-            <img src={product.image} alt={product.nombre} />
+            <img src={product.image} alt={product.nombre} loading="lazy" decoding="async" />
             <div className="history-product"><span className="history-status"><i className="fa-solid fa-circle-check" /> Compra registrada</span><h2>{product.nombre}</h2><p>{product.marca} · {product.cepa}</p></div>
             <div className="history-price"><span>Precio</span><strong>{formatPrice(product.precio_oferta || product.precio)}</strong></div>
             <Link className="wine-card-button" to={`/producto/${product.id}`}>Volver a comprar</Link>

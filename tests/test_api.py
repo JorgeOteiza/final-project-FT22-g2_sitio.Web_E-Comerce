@@ -149,6 +149,45 @@ class ApiTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_products_can_be_filtered_by_type_and_category(self):
+        by_type = self.client.get("/api/productos/tipo/tinto")
+        by_category = self.client.get("/api/productos/categoria/premium")
+
+        self.assertEqual(by_type.status_code, 200)
+        self.assertEqual(by_category.status_code, 200)
+        self.assertEqual(by_type.get_json()[0]["id"], self.product_id)
+        self.assertEqual(by_category.get_json()[0]["id"], self.product_id)
+
+    def test_products_can_be_searched_by_name(self):
+        response = self.client.get("/api/productos/Vino%20de%20prueba")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()[0]["nombre"], "Vino de prueba")
+
+    def test_search_without_results_returns_404(self):
+        response = self.client.get("/api/productos/inexistente")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_purchase_history_requires_authentication(self):
+        response = self.client.get("/api/historial-compra")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_product_can_be_added_to_purchase_history(self):
+        headers = self.login_headers()
+        created = self.client.post(
+            "/api/historial-compra",
+            headers=headers,
+            json={"producto_id": self.product_id},
+        )
+        history = self.client.get("/api/historial-compra", headers=headers)
+
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual(history.status_code, 200)
+        self.assertEqual(len(history.get_json()), 1)
+        self.assertEqual(history.get_json()[0]["producto"]["id"], self.product_id)
+
 
 if __name__ == "__main__":
     unittest.main()

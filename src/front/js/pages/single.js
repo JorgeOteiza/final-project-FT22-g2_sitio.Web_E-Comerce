@@ -84,7 +84,7 @@ const Single = () => {
                 {isIconWine && <DetailBadge tone="icon"><i className="fa-solid fa-gem" /> Vino ícono</DetailBadge>}
                 {product.precio_oferta && <DetailBadge tone="offer">-{discount}%</DetailBadge>}
               </div>
-              <img src={product.image} alt={product.nombre} />
+              <img src={product.image} alt={product.nombre} decoding="async" />
             </div>
             {isIconWine && <div className="single-icon-note"><i className="fa-solid fa-award" /><div><strong>Una etiqueta excepcional</strong><span>Selección de colección para ocasiones memorables.</span></div></div>}
           </div>

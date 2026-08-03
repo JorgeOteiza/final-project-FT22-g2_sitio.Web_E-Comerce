@@ -59,7 +59,7 @@ export const Home = () => {
 
       <section className="wine-origin-section">
         <div className="container wine-origin-grid">
-          <div className="wine-origin-image"><img src={originImage} alt="Barricas de vino en una bodega chilena" /></div>
+          <div className="wine-origin-image"><img src={originImage} alt="Barricas de vino en una bodega chilena" loading="lazy" decoding="async" /></div>
           <div className="wine-origin-copy">
             <span className="wine-eyebrow">Origen chileno</span>
             <h2>Del valle a tu mesa</h2>
