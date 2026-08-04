@@ -23,6 +23,7 @@ const Filteredproduct = () => {
   const urlOffers = searchParams.get("ofertas") === "1";
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({ query: urlQuery, type: urlType, grape: "", category: urlCategory, maxPrice: "", sort: "featured", offersOnly: urlOffers });
 
   useEffect(() => {
@@ -71,14 +72,15 @@ const Filteredproduct = () => {
         <h1>Encuentra tu próxima botella</h1>
         <p>{loading ? "Cargando selección…" : `${filtered.length} vinos disponibles`}</p>
       </header>
-      <div className="wine-filter-panel">
+      <button className="wine-mobile-filter-toggle" type="button" onClick={() => setFiltersOpen(open => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters"><span><i className="fa-solid fa-sliders" /> Filtrar y ordenar</span><i className={`fa-solid fa-chevron-${filtersOpen ? "up" : "down"}`} /></button>
+      <div className={`wine-filter-panel ${filtersOpen ? "mobile-open" : ""}`} id="catalog-filters">
         <label className="wine-filter-search"><span>Buscar</span><input value={filters.query} onChange={event => setFilter("query", event.target.value)} placeholder="Nombre, viña o cepa" /></label>
         <label><span>Tipo</span><select value={filters.type} onChange={event => setFilter("type", event.target.value)}><option value="">Todos</option>{options("tipo").map(value => <option key={value}>{value}</option>)}</select></label>
         <label><span>Cepa</span><select value={filters.grape} onChange={event => setFilter("grape", event.target.value)}><option value="">Todas</option>{options("cepa").map(value => <option key={value}>{value}</option>)}</select></label>
         <label><span>Categoría</span><select value={filters.category} onChange={event => setFilter("category", event.target.value)}><option value="">Todas</option>{options("categoria").map(value => <option key={value}>{value}</option>)}</select></label>
         <label><span>Precio máximo</span><select value={filters.maxPrice} onChange={event => setFilter("maxPrice", event.target.value)}><option value="">Sin límite</option><option value="5000">$5.000</option><option value="10000">$10.000</option><option value="20000">$20.000</option><option value="300000">$300.000</option></select></label>
         <label><span>Ordenar</span><select value={filters.sort} onChange={event => setFilter("sort", event.target.value)}><option value="featured">Destacados</option><option value="price-asc">Menor precio</option><option value="price-desc">Mayor precio</option><option value="discount">Ofertas primero</option></select></label>
-        <button className="wine-filter-clear" onClick={clear}>Limpiar</button>
+        <button className="wine-filter-clear" onClick={() => { clear(); setFiltersOpen(false); }}>Limpiar</button>
       </div>
       <div className="row g-4">
         {loading ? Array.from({ length: 8 }).map((_, index) => <ProductCardSkeleton key={index} />) : filtered.length ? <Card productos={filtered} /> : <EmptyResults clear={clear} />}

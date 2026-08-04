@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Context } from "../store/appContext.js";
 import { formatPrice } from "../component/Card.jsx";
+import favoriteIcon from "../../img/vino-add-favorites.png";
+import removeFavoriteIcon from "../../img/vino-modified 1.png";
 import "../../styles/ProductCard.css";
 
 const DetailBadge = ({ children, tone = "default" }) => <span className={`single-badge single-badge-${tone}`}>{children}</span>;
@@ -90,7 +92,7 @@ const Single = () => {
           </div>
           <div className="single-product-info">
             <span className="wine-eyebrow wine-eyebrow-dark">{product.marca}</span>
-            <div className="single-title-row"><h1>{product.nombre}</h1><button className={`single-favorite ${favorite ? "active" : ""} ${!token ? "requires-login" : ""}`} onClick={toggleFavorite} aria-label={token ? (favorite ? "Quitar de favoritos" : "Agregar a favoritos") : "Accede para agregar a favoritos"} title={!token ? "Inicia sesión para guardar favoritos" : ""}><i className={`${favorite ? "fa-solid" : "fa-regular"} fa-heart`} /></button></div>
+            <div className="single-title-row"><h1>{product.nombre}</h1><button className={`single-favorite ${favorite ? "active" : ""} ${!token ? "requires-login" : ""}`} onClick={toggleFavorite} aria-label={token ? (favorite ? "Quitar de favoritos" : "Agregar a favoritos") : "Accede para agregar a favoritos"} title={!token ? "Inicia sesión para guardar favoritos" : ""}><img src={favorite ? favoriteIcon : removeFavoriteIcon} alt="" /></button></div>
             <p className="single-subtitle">{product.cepa} · {product.unitFormat}</p>
             <div className="single-price">
               {product.precio_oferta && <span>{formatPrice(product.precio)}</span>}

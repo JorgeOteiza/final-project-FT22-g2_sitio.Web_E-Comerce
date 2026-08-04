@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 import "/src/front/styles/index.css";
 import { apiFetch } from "../services/api";
+import { Context } from "../store/appContext";
 
 export const formatPrice = price => new Intl.NumberFormat("es-CL", {
   style: "currency", currency: "CLP", maximumFractionDigits: 0,
@@ -20,20 +22,43 @@ const resetDocumentScroll = () => {
 };
 
 const ProductBadges = ({ product }) => (
-  <div className="product-badges">
+  <div className={`product-badges ${product.precio_oferta >= 200000 ? "product-badges-icon-wine" : product.categoria?.toLowerCase() === "premium" ? "product-badges-premium-wine" : ""}`}>
     {product.precio_oferta >= 200000 && <span className="product-badge product-badge-icon"><i className="fa-solid fa-gem" /> Vino ícono</span>}
-    {product.precio_oferta && <span className="product-badge product-badge-offer">-{discountPercent(product)}%</span>}
     {product.categoria?.toLowerCase() === "premium" && product.precio_oferta < 200000 && <span className="product-badge product-badge-premium">Premium</span>}
     {product.categoria?.toLowerCase() === "gran reserva" && <span className="product-badge product-badge-reserve">Gran reserva</span>}
+    {product.precio_oferta && <span className="product-badge product-badge-offer">-{discountPercent(product)}%</span>}
     {product.stock > 0 && product.stock <= 5 && !isLimitedAllocation(product) && <span className="product-badge product-badge-stock">Últimas unidades</span>}
   </div>
 );
 
-const Card = ({ productos = [] }) => (
-  <>
-    {productos.map(producto => (
+const ProductCard = ({ producto }) => {
+  const { store, actions } = useContext(Context);
+  const favorites = Array.isArray(store.favorites) ? store.favorites : [];
+  const favorite = favorites.some(item => item.id === producto.id);
+  const cart = Array.isArray(store.shoppingCart) ? store.shoppingCart : [];
+  const inCart = cart.some(item => item.id === producto.id);
+  const effectivePrice = producto.precio_oferta || producto.precio;
+  const toggleFavorite = async () => {
+    if (!localStorage.getItem("token")) {
+      Swal.fire({ icon:"info", title:"Accede para guardar favoritos", text:"Necesitas iniciar sesión para crear tu selección personal.", confirmButtonColor:"#7b2121" });
+      return;
+    }
+    try { await actions.toggleFavorite(producto); }
+    catch (error) { Swal.fire({ icon:"error", title:"No pudimos actualizar tus favoritos", text:error.message, confirmButtonColor:"#7b2121" }); }
+  };
+  const addToCart = () => {
+    if (!localStorage.getItem("token")) {
+      Swal.fire({ icon:"info", title:"Accede para comprar", text:"Inicia sesión para agregar productos al carrito.", confirmButtonColor:"#7b2121" });
+      return;
+    }
+    if (inCart || !producto.stock) return;
+    actions.setShoppingCart([...cart, { id:producto.id, nombre:producto.nombre, precio:effectivePrice, precio_original:producto.precio, image:producto.image, tipo:producto.tipo, unitFormat:producto.unitFormat, cantidad:1, stock:producto.stock }]);
+    Swal.fire({ toast:true, position:"top-end", timer:2200, showConfirmButton:false, icon:"success", title:`${producto.nombre} agregado al carrito` });
+  };
+  return (
       <div key={producto.id} className="col-12 col-sm-6 col-lg-3 d-flex">
         <article className={`wine-product-card w-100 ${producto.precio_oferta >= 200000 ? "wine-product-card-icon" : ""}`}>
+          <button className={`wine-card-favorite ${favorite ? "active" : ""}`} onClick={toggleFavorite} aria-label={favorite ? "Quitar de favoritos" : "Agregar a favoritos"}><i className={`${favorite ? "fa-solid" : "fa-regular"} fa-heart`} /></button>
           <Link className="wine-product-image-frame" to={`/producto/${producto.id}`} onClick={resetDocumentScroll} aria-label={`Ver ${producto.nombre}`}>
             <ProductBadges product={producto} />
             <img className="wine-product-image" src={producto.image} alt={producto.nombre} loading="lazy" />
@@ -50,11 +75,16 @@ const Card = ({ productos = [] }) => (
             <p className={`wine-stock ${producto.stock <= 5 && !isLimitedAllocation(producto) ? "wine-stock-low" : ""}`}>
               <i className="fa-solid fa-circle" /> {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
             </p>
-            <Link className="wine-card-button" to={`/producto/${producto.id}`} onClick={resetDocumentScroll}>Ver producto</Link>
+            <div className="wine-card-actions"><button className="wine-card-cart" onClick={addToCart} disabled={inCart || !producto.stock}><i className="fa-solid fa-bag-shopping" /> {inCart ? "En el carrito" : "Agregar"}</button><Link className="wine-card-button" to={`/producto/${producto.id}`} onClick={resetDocumentScroll}>Ver producto</Link></div>
           </div>
         </article>
       </div>
-    ))}
+  );
+};
+
+const Card = ({ productos = [] }) => (
+  <>
+    {productos.map(producto => <ProductCard producto={producto} key={producto.id} />)}
   </>
 );
 

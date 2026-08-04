@@ -36,6 +36,12 @@ export const Home = () => {
   }, []);
 
   const offers = useMemo(() => products.filter(product => product.precio_oferta).slice(0, 4), [products]);
+  const featured = useMemo(() => {
+    const priority = ["toro de piedra", "casillero del diablo", "bicicleta", "casas del bosque"];
+    const selected = priority.map(name => products.find(product => product.nombre?.toLowerCase().includes(name))).filter(Boolean);
+    const remaining = products.filter(product => !selected.some(item => item.id === product.id));
+    return [...selected, ...remaining].slice(0, 4);
+  }, [products]);
   const premium = useMemo(() => products.filter(product => product.categoria?.toLowerCase() === "premium").slice(0, 4), [products]);
 
   return (
@@ -48,14 +54,16 @@ export const Home = () => {
       </section>
 
       <ProductSection
-        eyebrow="Precios especiales"
-        title="Ofertas para brindar"
-        description="Aprovecha descuentos reales calculados sobre el precio habitual de cada etiqueta."
-        products={offers}
+        eyebrow="Nuestra vitrina"
+        title="Vinos que se roban las miradas"
+        description="Una selección equilibrada de tintos y blancos con etiquetas reconocibles, gran presencia y estilos para distintas ocasiones."
+        products={featured}
         loading={loading}
         link="/busqueda?ofertas=1"
-        linkText="Ver todas las ofertas"
+        linkText="Ir rápido a las ofertas"
       />
+
+      <ProductSection eyebrow="Precios especiales" title="Ofertas para brindar" description="Aprovecha descuentos reales calculados sobre el precio habitual de cada etiqueta." products={offers} loading={loading} link="/busqueda?ofertas=1" linkText="Ver todas las ofertas" />
 
       <section className="wine-origin-section">
         <div className="container wine-origin-grid">
