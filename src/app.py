@@ -22,9 +22,24 @@ ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../public/')
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'development-only-secret')
+secret_key = os.getenv('SECRET_KEY')
+if ENV == 'production' and (not secret_key or len(secret_key) < 32):
+    raise RuntimeError('SECRET_KEY debe contener al menos 32 caracteres en producción')
+app.config['JWT_SECRET_KEY'] = secret_key or 'development-only-secret'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=7)
 jwt = JWTManager(app)
+
+@jwt.expired_token_loader
+def expired_token_callback(_jwt_header, _jwt_payload):
+    return jsonify({'message': 'Tu sesión expiró. Vuelve a iniciar sesión.'}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(_reason):
+    return jsonify({'message': 'La sesión no es válida.'}), 401
+
+@jwt.unauthorized_loader
+def missing_token_callback(_reason):
+    return jsonify({'message': 'Debes iniciar sesión para continuar.'}), 401
 
 
 
@@ -52,6 +67,13 @@ setup_commands(app)
 
 # Add all endpoints form the API with a "api" prefix
 app.register_blueprint(api, url_prefix='/api')
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
 # Handle/serialize errors like a JSON object
 
@@ -84,4 +106,4 @@ def serve_any_other_file(path):
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=PORT, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=ENV == 'development')

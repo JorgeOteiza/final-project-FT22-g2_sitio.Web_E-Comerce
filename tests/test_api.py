@@ -189,19 +189,46 @@ class ApiTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401)
 
-    def test_product_can_be_added_to_purchase_history(self):
+    def test_purchase_history_cannot_be_forged_without_checkout(self):
         headers = self.login_headers()
-        created = self.client.post(
+        response = self.client.post(
             "/api/historial-compra",
             headers=headers,
             json={"producto_id": self.product_id},
         )
-        history = self.client.get("/api/historial-compra", headers=headers)
+        self.assertEqual(response.status_code, 405)
 
-        self.assertEqual(created.status_code, 201)
-        self.assertEqual(history.status_code, 200)
-        self.assertEqual(len(history.get_json()), 1)
-        self.assertEqual(history.get_json()[0]["producto"]["id"], self.product_id)
+    def test_products_cannot_be_modified_through_public_catalog(self):
+        self.assertEqual(
+            self.client.put(f"/api/productos/{self.product_id}", json={"stock": 999}).status_code,
+            405,
+        )
+        self.assertEqual(self.client.delete(f"/api/productos/{self.product_id}").status_code, 405)
+
+    def test_user_cannot_read_or_delete_another_account(self):
+        with app.app_context():
+            other_id = User.query.filter_by(email="invitado@example.com").first().id
+        headers = self.login_headers()
+        self.assertEqual(self.client.get(f"/api/users/{other_id}", headers=headers).status_code, 403)
+        self.assertEqual(self.client.delete(f"/api/users/{other_id}", headers=headers).status_code, 403)
+
+    def test_invalid_email_is_rejected(self):
+        response = self.client.post("/api/users", json={
+            "username": "Usuario",
+            "email": "correo-invalido",
+            "password": "password123",
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_security_headers_are_added(self):
+        response = self.client.get("/api/productos")
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+
+    def test_password_recovery_is_explicitly_disabled_for_demo(self):
+        response = self.client.post("/api/reset_password", json={"email": "jorge@example.com"})
+        self.assertEqual(response.status_code, 501)
+        self.assertNotIn("user_id", response.get_json())
 
     def test_checkout_requires_authentication_and_items(self):
         unauthorized = self.client.post("/api/checkout", json={"items": []})
@@ -265,6 +292,24 @@ class ApiTestCase(unittest.TestCase):
         with app.app_context():
             self.assertEqual(db.session.get(Producto, self.product_id).stock, 6)
             self.assertEqual(Orden.query.count(), 0)
+
+    def test_account_with_purchase_can_be_deleted_safely(self):
+        headers = self.login_headers()
+        checkout = self.client.post(
+            "/api/checkout",
+            headers=headers,
+            json={"items": [{"producto_id": self.product_id, "cantidad": 1}]},
+        )
+        deleted = self.client.delete("/api/users/me", headers=headers)
+
+        self.assertEqual(checkout.status_code, 201)
+        self.assertEqual(deleted.status_code, 200)
+        with app.app_context():
+            self.assertIsNone(User.query.filter_by(email="jorge@example.com").first())
+            self.assertEqual(Orden.query.count(), 0)
+            self.assertEqual(OrdenProducto.query.count(), 0)
+            self.assertEqual(HistorialCompra.query.count(), 0)
+            self.assertIsNotNone(User.query.filter_by(email="invitado@example.com").first())
 
 
 if __name__ == "__main__":

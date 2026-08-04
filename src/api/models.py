@@ -16,11 +16,11 @@ class User(db.Model):
     password = db.Column(db.String(200), unique=False, nullable=False)
     last_login = db.Column(db.DateTime())
     # Conexiones
-    profile = db.relationship("Profile", backref="user", uselist=False)
+    profile = db.relationship("Profile", backref="user", uselist=False, cascade="all, delete-orphan")
     favoritos = db.relationship("Favorito", backref="user", cascade="all, delete-orphan")
-    facturas = db.relationship("Factura", backref="user")
-    ordenes = db.relationship("Orden", backref="user")
-    historialCompra = db.relationship("HistorialCompra", backref="user")
+    facturas = db.relationship("Factura", backref="user", cascade="all, delete-orphan")
+    ordenes = db.relationship("Orden", backref="user", cascade="all, delete-orphan")
+    historialCompra = db.relationship("HistorialCompra", backref="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -196,7 +196,7 @@ class Orden(db.Model):
     status = db.Column(db.String(120), nullable=False)
     # Conexiones
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    factura = db.relationship("Factura", backref="orden", uselist=False)
+    factura = db.relationship("Factura", backref="orden", uselist=False, cascade="all, delete-orphan")
     productos = db.relationship("OrdenProducto", backref="orden", cascade="all, delete-orphan")
 
     def serialize(self):

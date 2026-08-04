@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from datetime import datetime, timezone
+import re
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Producto, Favorito, HistorialCompra, Orden, OrdenProducto
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
-# from email import sendMail
 
 api = Blueprint('api', __name__)
 
@@ -24,6 +24,8 @@ def manage_users():
         return jsonify({
             'message': 'Usuario, email y una contraseña de al menos 8 caracteres son obligatorios'
         }), 400
+    if len(username) > 120 or len(email) > 120 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        return jsonify({'message': 'Ingresa un nombre y un correo electrónico válidos'}), 400
     if User.query.filter_by(email=email).first():
         return jsonify({'message': 'Ya existe una cuenta con ese email'}), 409
 
@@ -48,38 +50,39 @@ def login():
     password = data.get('password', '')
 
     if not email or not password:
-        return jsonify({'message': 'Email and password are required'}), 400
+        return jsonify({'message': 'El correo y la contraseña son obligatorios'}), 400
     user = User.query.filter_by(email=email).first()
 
-    if not user or not check_password_hash(user.password, password):
-        return jsonify({'message': 'Invalid email or password'}), 401
-    
+    if not user or not user.active or not check_password_hash(user.password, password):
+        return jsonify({'message': 'Correo o contraseña incorrectos'}), 401
+
+    user.last_login = datetime.now(timezone.utc)
+    db.session.commit()
     token = create_access_token(identity=str(user.id))
-    return jsonify({'token': token, 'user_id': user.id, 'message': 'Login successful'}), 200
+    return jsonify({'token': token, 'user_id': user.id, 'message': 'Sesión iniciada'}), 200
 
 # RUTA LISTA
-@api.route('/productos/<int:producto_id>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/productos/<int:producto_id>', methods=['GET'])
 def producto_detail(producto_id):
-    producto = Producto.query.get_or_404(producto_id)
-    if request.method == 'GET':
-        return jsonify(producto.serialize())
+    producto = Producto.query.filter_by(id=producto_id, active=True).first_or_404()
+    return jsonify(producto.serialize())
 
 # RUTA LISTA
 @api.route('/productos', methods=['GET'])
 def get_all_products():
-    productos = Producto.query.all()
+    productos = Producto.query.filter_by(active=True).all()
     return jsonify([producto.serialize() for producto in productos])
 
 @api.route('/productos/tipo/<string:tipo>', methods=['GET'])
 def get_products_by_type(tipo):
 
-    productos = Producto.query.filter_by(tipo=tipo)
+    productos = Producto.query.filter_by(tipo=tipo, active=True)
     return jsonify([producto.serialize() for producto in productos])
 
 @api.route('/productos/categoria/<string:categoria>', methods=['GET'])
 def get_all_products_by_category(categoria):
 
-    productos = Producto.query.filter_by(categoria=categoria)
+    productos = Producto.query.filter_by(categoria=categoria, active=True)
     return jsonify([category.serialize() for category in productos])
 
 @api.route('/favoritos', methods=['GET'])
@@ -160,7 +163,8 @@ def get_products_by_search(busqueda):
     productos = Producto.query.filter(
         (Producto.nombre.ilike(f"%{busqueda}%")) |
         (Producto.tipo.ilike(f"%{busqueda}%")) |
-        (Producto.categoria.ilike(f"%{busqueda}%"))
+        (Producto.categoria.ilike(f"%{busqueda}%")),
+        Producto.active.is_(True),
     ).all()
 
     if productos:
@@ -169,30 +173,15 @@ def get_products_by_search(busqueda):
         return jsonify({"message": "No se encontraron productos con ese nombre, tipo o categoría"}), 404
 
 # RUTA LISTA
-@api.route('/historial-compra', methods=['GET', 'POST'])
+@api.route('/historial-compra', methods=['GET'])
 @jwt_required()
 def get_historial():
     user_id = int(get_jwt_identity())
     if db.session.get(User, user_id) is None:
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
-    if request.method == 'POST':
-        data = request.get_json(silent=True) or {}
-        producto_id = data.get('producto_id')
-
-        if not producto_id:
-            return jsonify({'message': 'producto_id is required'}), 400
-        if db.session.get(Producto, producto_id) is None:
-            return jsonify({'message': 'Producto no encontrado'}), 404
-
-        historial_compra = HistorialCompra(producto_id=producto_id, user_id=user_id)
-        historial_compra.save()
-
-        return jsonify({'message': 'HistorialCompra created successfully'}), 201
-
-    elif request.method == 'GET':
-        historial_compras = HistorialCompra.query.filter_by(user_id=user_id).all()
-        return jsonify([historial.serialize() for historial in historial_compras])
+    historial_compras = HistorialCompra.query.filter_by(user_id=user_id).order_by(HistorialCompra.id.desc()).all()
+    return jsonify([historial.serialize() for historial in historial_compras])
 
 @api.route('/checkout', methods=['POST'])
 @jwt_required()
@@ -284,34 +273,12 @@ def checkout():
         db.session.rollback()
         return jsonify({'message': 'No se pudo completar la compra'}), 500
     
-@api.route('/reset_password', methods=['POST', 'GET', 'PUT'])
+@api.route('/reset_password', methods=['POST'])
 def reset_password():
-    if request.method == 'PUT':
-        email = request.json.get('email')  # Obtener el correo electrónico del cuerpo de la solicitud
-        user= User.query.filter_by(email=email).first()
-        if user is not None:
-            # Se tiene que crear nueva contraseña y borrar la anterior
+    # No se simula un cambio de contraseña inseguro. La demo responde de forma
+    # uniforme para no revelar si una dirección está registrada.
+    return jsonify({
+        'message': 'La recuperación de contraseña no está habilitada en esta demostración'
+    }), 501
 
-            return jsonify({'user_id': user.id, 'message': 'url con el token'}), 200
-
-        else:
-            return("el usuario no fue encontrado")
-
-
-# # Ruta para manejar la solicitud de restablecimiento de contraseña
-# @api.route('/reset_password', methods=['POST', 'GET'])
-# def reset_password():
-#     if request.method == 'POST':
-#         email = request.json.get('email')
-#         user = User.query.filter_by(email=email).first()
-
-#         if user:
-#             # Generar token y enviar al correo del usuario
-#             # Aquí deberías enviar un correo con un enlace que contenga el token
-#             # por ejemplo, usando una librería como Flask-Mail
-#             sendMail(email)
-
-#             # Devolver la respuesta al frontend
-#             return jsonify({'message': 'Email enviado con éxito'}), 200
-#         else:
-#             return jsonify({'message': 'Usuario no encontrado'}), 404
+# Fin de las rutas públicas de la API.
