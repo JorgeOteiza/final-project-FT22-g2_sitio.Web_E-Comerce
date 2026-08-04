@@ -6,7 +6,7 @@ const {
   formatExpiry,
   isValidCardNumber,
   isValidExpiry,
-} = require("../src/front/js/component/cardValidation.common.js");
+} = require("../src/front/js/component/cardValidation.common.cjs");
 
 test("elimina caracteres ajenos a campos numéricos", () => {
   assert.equal(onlyDigits("12a-34 / 5"), "12345");

@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "../services/alerts";
 import { Context } from "../store/appContext";
+import "../../styles/registro.css";
 import "../../styles/logIn.css";
 
 const LogIn = () => {

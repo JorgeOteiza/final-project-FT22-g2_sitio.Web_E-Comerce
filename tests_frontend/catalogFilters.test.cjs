@@ -4,7 +4,7 @@ const {
   normalize,
   effectivePrice,
   filterAndSortProducts,
-} = require("../src/front/js/component/catalogFilters.common.js");
+} = require("../src/front/js/component/catalogFilters.common.cjs");
 
 const products = [
   { id: 1, nombre: "Montes Alpha", marca: "Montes", tipo: "tinto", cepa: "Carménère", categoria: "premium", precio: 16290, precio_oferta: 13032 },

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, ProductCardSkeleton } from "./Card.jsx";
 import { apiFetch } from "../services/api";
-const { filterAndSortProducts } = require("./catalogFilters.common.js");
+const { filterAndSortProducts } = require("./catalogFilters.common.cjs");
 import "../../styles/filter.css";
 
 const EmptyResults = ({ clear }) => (

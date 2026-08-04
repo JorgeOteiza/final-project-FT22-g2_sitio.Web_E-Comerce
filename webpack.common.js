@@ -3,6 +3,7 @@ const path = require('path');
 const os = require('os');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   cache: {
@@ -34,7 +35,7 @@ module.exports = {
         },
         {
           test: /\.(css|scss)$/, use: [{
-              loader: "style-loader" // creates style nodes from JS strings
+              loader: MiniCssExtractPlugin.loader
           }, {
               loader: "css-loader" // translates CSS into CommonJS
           }]
@@ -45,7 +46,11 @@ module.exports = {
             options: { name: '[name].[ext]' }
           }
         }, //for images
-        { test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/, use: ['file-loader'] } //for fonts
+        {
+          test: /\.(woff2?|ttf|eot)(\?.*)?$/i,
+          type: 'asset/resource',
+          generator: { filename: 'fonts/[name][ext]' }
+        }
     ]
   },
   resolve: {
@@ -55,6 +60,10 @@ module.exports = {
     new HtmlWebpackPlugin({
         favicon: '4geeks.ico',
         template: 'template.html'
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'styles.[contenthash:8].css',
+      chunkFilename: '[name].[contenthash:8].css'
     }),
     new Dotenv({ safe: './.env.frontend.example', systemvars: true })
   ]

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "../services/alerts";
 import webpayLogo from "../../img/webpayLogo.png";
-const { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } = require("./cardValidation.common.js");
+const { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } = require("./cardValidation.common.cjs");
 import "../../styles/pagoTarjetaDeCredito.css";
 
 const Webpay = () => {

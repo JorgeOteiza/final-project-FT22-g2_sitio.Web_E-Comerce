@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import Modal from "bootstrap/js/dist/modal";
 import "../../styles/modalControlEdad.css";
 import logoElRinconDelVino from "../../img/logoElRinconDelVino.png";
 
@@ -9,7 +10,7 @@ const ModalControlEdad = () => {
         const timer = window.setTimeout(() => {
             const element = document.getElementById("staticBackdrop");
             if (!element) return;
-            const ageModal = bootstrap.Modal.getOrCreateInstance(element, {
+            const ageModal = Modal.getOrCreateInstance(element, {
                 backdrop: "static",
                 keyboard: false,
             });
