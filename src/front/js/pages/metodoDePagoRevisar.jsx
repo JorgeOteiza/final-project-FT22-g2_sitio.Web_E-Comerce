@@ -1,47 +1,18 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import logoElRinconDelVino from "../../img/logoElRinconDelVino.png";
+import { Link, Navigate } from "react-router-dom";
 import { MetodoPagoContext } from "../component/ContextPago.jsx";
-
-import PagoTarjetaDeCredito from "../component/PagoTarjetaCredito.jsx"
+import PagoTarjetaDeCredito from "../component/PagoTarjetaCredito.jsx";
 import Webpay from "../component/Webpay.jsx";
-import Paypal from "../component/Paypal.jsx";
-import Direccion from "../component/Direccion.jsx";
-
 import "../../styles/metodoDePagoRevisar.css";
 
 const MetodoDePagoRevisar = () => {
-    const { seleccionarMetodo, metodoSeleccionado } = useContext(MetodoPagoContext);
-
-    return (
-
-            <div className="container-fluid container-vista-metodo-de-pago">
-                {/* TITULO Y BOTÓN PARA REGRESAR A VISTA ANTERIOR */}
-                <div className="title-regresar-anterior-vista row">
-                    {/* VISTA PREVIA */}
-                    <Link to={"/metodo-de-pago"} className="flecha-vista-anterior col-1">
-                        <button type="button" className="button-regresar-anterior-vista"><i className="fa-solid fa-arrow-left"></i></button>
-                    </Link>
-                    <h3 className="col-10">Confirmar compra</h3>
-                </div>
-
-                {/* ---- // BARRA PROCESO DE PAGO // ---- */}
-                <div className="proceso-de-pago-barra-pago-revisar">
-                    <h5 className="texto-barra-proceso-pago">Carro</h5>
-                    <h5 className="texto-barra-proceso-pago">Pago</h5>
-                    <h5 className="texto-barra-proceso-pago">Revisar</h5>
-                </div>
-                <div>
-                    <h4>Método de Pago Seleccionado:</h4>
-                    <p>{metodoSeleccionado}</p>
-                    {metodoSeleccionado === "credito" && <PagoTarjetaDeCredito />}
-                    {metodoSeleccionado === "debito" && <Webpay />}
-                    {/* {metodoSeleccionado === "payPal" && <Paypal />} */}
-
-                </div>
-            </div>
-
-    )
-}
-
+  const { metodoSeleccionado } = useContext(MetodoPagoContext);
+  if (!metodoSeleccionado) return <Navigate to="/metodo-de-pago" replace />;
+  const methodName = metodoSeleccionado === "credito" ? "Tarjeta de crédito" : "Tarjeta de débito";
+  return <main className="payment-review-page"><div className="container payment-review-container">
+    <header className="payment-review-header"><Link to="/metodo-de-pago" aria-label="Volver a métodos de pago"><i className="fa-solid fa-arrow-left" /></Link><div><span className="wine-eyebrow wine-eyebrow-dark">Pago seguro</span><h1>Confirmar compra</h1></div></header>
+    <div className="proceso-de-pago-barra-pago-revisar" aria-label="Progreso de la compra"><span>Carrito</span><span className="active">Pago</span><span>Revisar</span></div>
+    <section className="payment-review-content"><span className="wine-eyebrow wine-eyebrow-dark">Método seleccionado</span><h2>{methodName}</h2>{metodoSeleccionado === "credito" ? <PagoTarjetaDeCredito /> : <Webpay />}</section>
+  </div></main>;
+};
 export default MetodoDePagoRevisar;

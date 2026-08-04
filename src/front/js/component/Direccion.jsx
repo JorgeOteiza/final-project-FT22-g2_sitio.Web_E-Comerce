@@ -81,9 +81,9 @@ const Direccion = () => {
             <label>Región<select name="region" value={address.region} onChange={updateField} required><option value="">Selecciona tu región</option>{regions.map(region => <option key={region}>{region}</option>)}</select></label>
             <label>Comuna<input name="comuna" value={address.comuna} onChange={updateField} maxLength="30" required /></label>
             <label className="shipping-wide">Dirección<input name="calle" value={address.calle} onChange={updateField} maxLength="60" required /></label>
-            <label>Piso o departamento <small>(opcional)</small><input name="numeroCasa" value={address.numeroCasa} onChange={updateField} maxLength="20" /></label>
-            <label>Código postal<input name="codigoPostal" inputMode="numeric" value={address.codigoPostal} onChange={updateField} maxLength="7" required /></label>
-            <label>Teléfono<input name="numeroContacto" inputMode="numeric" value={address.numeroContacto} onChange={updateField} maxLength="9" required /></label>
+            <label><span>Casa/Depto. <small>(opcional)</small></span><input name="numeroCasa" value={address.numeroCasa} onChange={updateField} maxLength="20" placeholder="Número de casa/depto." /></label>
+            <label><span>Código postal <small>7 dígitos</small></span><input name="codigoPostal" inputMode="numeric" pattern="[0-9]{7}" value={address.codigoPostal} onChange={updateField} maxLength="7" placeholder="1234567" required /></label>
+            <label><span>Teléfono <small>9 dígitos</small></span><input name="numeroContacto" inputMode="numeric" pattern="[0-9]{9}" value={address.numeroContacto} onChange={updateField} maxLength="9" placeholder="912345678" required /></label>
             <button className="wine-button wine-button-primary shipping-submit" type="submit" disabled={submitting}>{submitting ? "Confirmando compra…" : `Confirmar compra por ${formatPrice(total)}`}</button>
           </form>
           <aside className="shipping-summary"><h2>Tu pedido</h2>{cart.map(item => <div key={item.id}><span>{item.cantidad} × {item.nombre}</span><strong>{formatPrice(item.precio * item.cantidad)}</strong></div>)}<div className="shipping-total"><span>Total</span><strong>{formatPrice(total)}</strong></div><p><i className="fa-solid fa-lock" /> Pago simulado. No almacenamos datos bancarios.</p></aside>

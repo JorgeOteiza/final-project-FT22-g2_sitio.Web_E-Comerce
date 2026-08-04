@@ -1,225 +1,36 @@
 import React, { useState } from "react";
-import Cards from 'react-credit-cards'
-import 'react-credit-cards/es/styles-compiled.css'
+import Cards from "react-credit-cards";
+import "react-credit-cards/es/styles-compiled.css";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } from "./cardValidation";
+import "../../styles/pagoTarjetaDeCredito.css";
 
-import pagoTarjetaDeCredito from "../../styles/pagoTarjetaDeCredito.css";
-import { Link } from "react-router-dom";
-import Swal from 'sweetalert2'
-
-const TarjetaDeCredito = () => {
-
-    const [state, setState] = useState({
-        number: "",
-        name: "",
-        expiry: "",
-        cvc: "",
-        focus: ""
-    })
-
-    const handleOnClickDefault = (e) => {
-        e.preventDefault();
-
-        const numberOnly = /^\d+$/;
-
-        let isValid = true;
-
-        if (state.number === '' || state.name === '' || state.expiry === '' || state.cvc === '') {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Todos los campos son obligatorios!",
-            });
-        } else {
-
-            if (!numberOnly.test(state.number)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "El número de tarjeta sólo puede contener dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (state.number.length < 16 || state.number.length > 16) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Número de tarjeta debe tener 16 dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (state.name.length < 1 || state.name.length > 40) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "El nombre no puede ir vacío!",
-                });
-                isValid = false;
-            }
-
-            if (!numberOnly.test(state.expiry)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La fecha de expiración sólo puede contener dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (state.expiry.length < 4 || state.expiry.length > 4) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Fecha de expiración debe tener 4 dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (!numberOnly.test(state.cvc)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "El CVC sólo puede contener dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (state.cvc.length < 3 || state.cvc.length > 3) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "CVC debe tener 3 dígitos!",
-                });
-                isValid = false;
-            }
-
-            if (isValid) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Los campos se rellenaron correctamente!",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-
-                setTimeout(() => {
-                    window.location.href = process.env.BASENAME + "metodo-de-pago/direccion";
-                }, 2000);
-            }
-        }
-    }
-
-    const handleInputChange = (e) => {
-        setState({
-            ...state,
-            [e.target.name]: e.target.value
-        })
-    }
-
-    // const handleInputChangeNumbers = (e) => {
-    //     setState({
-    //         ...state,
-    //         [e.target.name]: e.target.value
-    //     })
-    // }
-
-    const handleFocusChange = (e) => {
-        setState({
-            ...state,
-            focus: e.target.name
-        })
-    }
-
-    return (
-        <div className="card card-tarjeta-de-credito">
-            <div className="card-body card-body-tarjeta-de-credito">
-
-                < Cards
-                    number={state.number}
-                    name={state.name}
-                    expiry={state.expiry}
-                    cvc={state.cvc}
-                    focused={state.focus}
-                />
-                <form>
-                    {/* numero de tarjeta */}
-                    <div className="form-group">
-                        <label htmlFor="number">Número de la tarjeta</label>
-                        <input
-                            type="text"
-                            name="number"
-                            id="number-tarjeta"
-                            inputMode="numeric"
-                            maxLength={16}
-                            minLength={16}
-                            className="form-control"
-                            required
-                            onChange={handleInputChange}
-                            onFocus={handleFocusChange}
-                        />
-                    </div>
-                    {/*  nombre tarjeta */}
-                    <div className="form-group">
-                        <label htmlFor="name">Nombre</label>
-                        <input
-                            type="text"
-                            name="name"
-                            id="name-tarjeta"
-                            maxLength={40}
-                            className="form-control"
-                            required
-                            onChange={handleInputChange}
-                            onFocus={handleFocusChange}
-                        />
-                    </div>
-                    {/* fecha de expiracion tarjeta */}
-                    <div className="form row">
-                        <div className="form-group col-md-6">
-                            <label htmlFor="expiry">Fecha de expiración</label>
-                            <input
-                                type="text"
-                                name="expiry"
-                                id="expiryTarjeta"
-                                inputMode="numeric"
-                                maxLength={4}
-                                minLength={4}
-                                className="form-control"
-                                required
-                                onChange={handleInputChange}
-                                onFocus={handleFocusChange}
-                            />
-                        </div>
-                        {/* CVC tarjeta */}
-                        <div className="form-group col-md-6">
-                            <label htmlFor="cvc">CVC</label>
-                            <input
-                                type="text"
-                                name="cvc"
-                                id="cvcTarjeta"
-                                inputMode="numeric"
-                                maxLength={3}
-                                minLength={3}
-                                className="form-control"
-                                required
-                                onChange={handleInputChange}
-                                onFocus={handleFocusChange}
-                            />
-                        </div>
-                    </div>
-                    {/* BOTON PARA validar */}
-                    <div className="boton-actualizar-cambiarDireccion p-3">
-                        <Link to="metodo-de-pago/direccion">
-                            <button type="submit" className="btn btn-secondary btn-sm" onClick={handleOnClickDefault}>Continuar</button>
-                        </Link>
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-
-
-    )
-}
-export default TarjetaDeCredito;
+const PagoTarjetaCredito = () => {
+  const navigate = useNavigate();
+  const [card, setCard] = useState({ number:"", name:"", expiry:"", cvc:"", focus:"" });
+  const update = event => {
+    const { name } = event.target;
+    let value = event.target.value;
+    if (name === "number") value = formatCardNumber(value);
+    if (name === "expiry") value = formatExpiry(value);
+    if (name === "cvc") value = onlyDigits(value).slice(0, 3);
+    setCard(current => ({ ...current, [name]:value }));
+  };
+  const submit = event => {
+    event.preventDefault();
+    if (!isValidCardNumber(card.number)) return Swal.fire({ icon:"error", title:"Número de tarjeta inválido", text:"Ingresa un número de 16 dígitos válido.", confirmButtonColor:"#7b2121" });
+    if (card.name.trim().length < 3) return Swal.fire({ icon:"error", title:"Nombre inválido", text:"Ingresa el nombre que aparece en la tarjeta.", confirmButtonColor:"#7b2121" });
+    if (!isValidExpiry(card.expiry)) return Swal.fire({ icon:"error", title:"Fecha inválida", text:"Usa el formato MM/AA y una fecha vigente.", confirmButtonColor:"#7b2121" });
+    if (!/^\d{3}$/.test(card.cvc)) return Swal.fire({ icon:"error", title:"CVC inválido", text:"Ingresa los 3 dígitos de seguridad.", confirmButtonColor:"#7b2121" });
+    navigate("/metodo-de-pago/direccion");
+  };
+  return <div className="card-payment-panel"><Cards number={onlyDigits(card.number)} name={card.name} expiry={onlyDigits(card.expiry)} cvc={card.cvc} focused={card.focus} /><form className="card-payment-form" onSubmit={submit}>
+    <label>Número de tarjeta<div className="payment-input"><i className="fa-regular fa-credit-card" /><input name="number" value={card.number} onChange={update} onFocus={() => setCard(current => ({...current,focus:"number"}))} inputMode="numeric" placeholder="1234 5678 9012 3456" autoComplete="cc-number" required /></div><small className="payment-field-hint">Demo: usa 4242 4242 4242 4242. No ingreses una tarjeta real.</small></label>
+    <label className="card-holder">Nombre del titular<div className="payment-input"><i className="fa-regular fa-user" /><input name="name" value={card.name} onChange={update} onFocus={() => setCard(current => ({...current,focus:"name"}))} placeholder="Nombre y apellido" autoComplete="cc-name" maxLength="40" required /></div></label>
+    <label>Fecha de caducidad<div className="payment-input"><i className="fa-regular fa-calendar" /><input name="expiry" value={card.expiry} onChange={update} onFocus={() => setCard(current => ({...current,focus:"expiry"}))} inputMode="numeric" placeholder="MM/AA" autoComplete="cc-exp" maxLength="5" required /></div></label>
+    <label>CVC<div className="payment-input"><i className="fa-solid fa-lock" /><input name="cvc" value={card.cvc} onChange={update} onFocus={() => setCard(current => ({...current,focus:"cvc"}))} inputMode="numeric" placeholder="123" autoComplete="cc-csc" maxLength="3" required /></div></label>
+    <button className="wine-button wine-button-primary card-payment-submit" type="submit">Continuar al envío</button>
+  </form></div>;
+};
+export default PagoTarjetaCredito;
