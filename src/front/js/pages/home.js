@@ -6,7 +6,7 @@ import { Card, ProductCardSkeleton } from "../component/Card.jsx";
 import ModalControlEdad from "../component/ModalControlEdad.jsx";
 import { apiFetch } from "../services/api";
 import originImage from "../../img/barriles-concha-y-toro.webp";
-import vineyardCircleImage from "../../img/vina-circular-don-melchor.jpg";
+import vineyardCircleImage from "../../img/vina-circular-don-melchor.webp";
 
 const ProductSection = ({ eyebrow, title, description, products, loading, link, linkText }) => (
   <section className="wine-section container">

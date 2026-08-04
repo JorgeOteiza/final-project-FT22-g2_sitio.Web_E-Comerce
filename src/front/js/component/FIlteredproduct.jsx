@@ -2,9 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, ProductCardSkeleton } from "./Card.jsx";
 import { apiFetch } from "../services/api";
+const { filterAndSortProducts } = require("./catalogFilters.common.js");
 import "../../styles/filter.css";
-
-const normalize = value => (value || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 const EmptyResults = ({ clear }) => (
   <div className="wine-empty-state">
@@ -42,26 +41,7 @@ const Filteredproduct = () => {
   };
 
   const filtered = useMemo(() => {
-    const query = normalize(filters.query);
-    const result = products.filter(product => {
-      const searchable = normalize([product.nombre, product.marca, product.tipo, product.cepa, product.categoria].join(" "));
-      const offerMatch = query === "ofertas" ? Boolean(product.precio_oferta) : searchable.includes(query);
-      const price = product.precio_oferta || product.precio;
-      return offerMatch
-        && (!filters.offersOnly || Boolean(product.precio_oferta))
-        && (!filters.type || normalize(product.tipo) === normalize(filters.type))
-        && (!filters.grape || product.cepa === filters.grape)
-        && (!filters.category || normalize(product.categoria) === normalize(filters.category))
-        && (!filters.maxPrice || price <= Number(filters.maxPrice));
-    });
-    return [...result].sort((a, b) => {
-      const aPrice = a.precio_oferta || a.precio;
-      const bPrice = b.precio_oferta || b.precio;
-      if (filters.sort === "price-asc") return aPrice - bPrice;
-      if (filters.sort === "price-desc") return bPrice - aPrice;
-      if (filters.sort === "discount") return Number(Boolean(b.precio_oferta)) - Number(Boolean(a.precio_oferta));
-      return a.id - b.id;
-    });
+    return filterAndSortProducts(products, filters);
   }, [products, filters]);
 
   const clear = () => { setFilters({ query: "", type: "", grape: "", category: "", maxPrice: "", sort: "featured", offersOnly: false }); setSearchParams({}); };

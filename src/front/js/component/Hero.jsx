@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import heroUrl from "../../img/vina-concha-y-toro-hero.jpg";
+import heroUrl from "../../img/vina-concha-y-toro-hero.webp";
 import "../../styles/navbarHero.css";
 
 const Hero = () => (
