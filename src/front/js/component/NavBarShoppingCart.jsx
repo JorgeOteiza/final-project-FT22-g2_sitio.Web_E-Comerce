@@ -14,7 +14,7 @@ export const NavBarShoppingCart = () => {
   return (
     <div className="dropdown">
       <button className="wine-navbar-icon wine-cart-trigger" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Abrir carrito">
-        <i className="fa-solid fa-bag-shopping" />{units > 0 && <span>{units}</span>}
+        <i className="fa-solid fa-bag-shopping" /><span className="wine-mobile-action-label">Tu carrito</span>{units > 0 && <span className="wine-cart-count">{units}</span>}
       </button>
       <div className="dropdown-menu dropdown-menu-end wine-dropdown wine-mini-cart">
         <div className="wine-mini-cart-header"><strong>Tu carrito</strong><span>{units} {units === 1 ? "unidad" : "unidades"}</span></div>

@@ -1,0 +1,30 @@
+.profile-hero>div:last-child,.profile-panel,.profile-links{min-width:0}
+@media(max-width:430px){
+  .profile-page{padding-bottom:55px}
+  .profile-container{width:100%;padding:0 12px}
+  .profile-hero{min-height:auto;margin:0;padding:30px 18px 38px;border-radius:0 0 22px 22px;gap:16px}
+  .profile-avatar{width:88px;height:88px;flex-basis:88px}
+  .profile-hero h1{font-size:2rem;overflow-wrap:anywhere}
+  .profile-hero>div:last-child{width:100%;min-width:0}
+  .profile-hero p{max-width:100%;font-size:.86rem;overflow-wrap:anywhere}
+  .profile-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 24px;border-radius:14px}
+  .profile-stats>div{display:flex;flex-direction:column;gap:4px;padding:14px 5px;border-right:1px solid #eadfd6;border-bottom:0;text-align:center}
+  .profile-stats>div:last-child{border-right:0}
+  .profile-stats span{font-size:.68rem}
+  .profile-stats strong{font-size:1.1rem}
+  .profile-grid{gap:16px}
+  .profile-panel,.profile-links,.profile-security{padding:20px 16px;border-radius:15px}
+  .profile-panel-heading h2,.profile-links h2,.profile-security h2{font-size:1.35rem}
+  .profile-panel-heading>i{width:38px;height:38px}
+  .profile-panel dl{margin-top:16px}
+  .profile-panel dl>div{padding:12px 0}
+  .profile-panel dd{overflow-wrap:anywhere}
+  .profile-links>a{grid-template-columns:34px minmax(0,1fr) auto;padding:11px 8px}
+  .profile-links span small{font-size:.75rem}
+  .profile-security{margin-top:16px;gap:18px}
+}
+@media(max-width:340px){
+  .profile-container{padding-inline:8px}
+  .profile-panel,.profile-links,.profile-security{padding-inline:12px}
+  .profile-stats span{font-size:.62rem}
+}

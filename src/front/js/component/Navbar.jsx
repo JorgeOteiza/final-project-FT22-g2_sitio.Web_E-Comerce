@@ -62,7 +62,7 @@ const Navbar = () => {
             <div className="wine-navbar-actions">
               <NavBarShoppingCart />
               <div className="dropdown">
-                <button className="wine-navbar-icon" data-bs-toggle="dropdown" aria-expanded="false" aria-label={token ? "Menú de usuario" : "Acceder"}><i className={`fa-solid ${token ? "fa-user" : "fa-right-to-bracket"}`} /></button>
+                <button className="wine-navbar-icon wine-user-trigger" data-bs-toggle="dropdown" aria-expanded="false" aria-label={token ? "Menú de usuario" : "Acceder"}><i className={`fa-solid ${token ? "fa-user" : "fa-right-to-bracket"}`} /><span className="wine-mobile-action-label">{token ? "Mi perfil" : "Acceder"}</span><i className="fa-solid fa-chevron-down wine-mobile-action-chevron" /></button>
                 <ul className="dropdown-menu dropdown-menu-end wine-dropdown">
                   {token ? <><DropdownLink to="/perfil">Mi perfil</DropdownLink><DropdownLink to="/favoritos">Mis favoritos</DropdownLink><li><button className="dropdown-item" onClick={logout}>Cerrar sesión</button></li></> : <><li><button className="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalLogin">Acceder</button></li><DropdownLink to="/registro">Crear cuenta</DropdownLink></>}
                 </ul>

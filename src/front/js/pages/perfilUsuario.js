@@ -5,6 +5,7 @@ import { Context } from "../store/appContext";
 import { apiFetch } from "../services/api";
 import usuarioFoto from "../../img/usuario-perfil.webp";
 import "../../styles/perfilUsuario.css";
+import "../../styles/responsive.css";
 
 const PerfilUsuario = () => {
   const { store } = useContext(Context);
