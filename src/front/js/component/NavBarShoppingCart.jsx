@@ -10,6 +10,15 @@ export const NavBarShoppingCart = () => {
   if (!token) return null;
   const units = cart.reduce((total, item) => total + item.cantidad, 0);
   const subtotal = cart.reduce((total, item) => total + item.precio * item.cantidad, 0);
+  const scrollToCartProducts = () => {
+    const scroll = () => document.getElementById("productos-carrito")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    window.requestAnimationFrame(scroll);
+    window.setTimeout(scroll, 180);
+  };
 
   return (
     <div className="dropdown">
@@ -22,7 +31,7 @@ export const NavBarShoppingCart = () => {
           <div className="wine-mini-cart-items">{cart.slice(0, 3).map((item, index) => <div className="wine-mini-cart-item" key={`${item.nombre}-${index}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><strong>{item.nombre}</strong><span>{item.cantidad} × {formatPrice(item.precio)}</span></div><b>{formatPrice(item.precio * item.cantidad)}</b></div>)}</div>
           {cart.length > 3 && <p className="wine-mini-cart-more">Y {cart.length - 3} productos más</p>}
           <div className="wine-mini-cart-total"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
-          <Link className="wine-button wine-button-primary" to="/carrito">Ver carrito</Link>
+          <Link className="wine-button wine-button-primary" to="/carrito#productos-carrito" onClick={scrollToCartProducts}>Ver carrito</Link>
         </> : <div className="wine-mini-cart-empty"><i className="fa-solid fa-basket-shopping" /><strong>Tu carrito está vacío</strong><span>Agrega una botella para comenzar.</span></div>}
       </div>
     </div>

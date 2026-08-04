@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "../services/alerts";
 import { Context } from "../store/appContext";
 import { formatPrice } from "./Card.jsx";
+import "../../styles/metodoDePago.css";
 import "../../styles/cambiarDireccion.css";
 
 const initialAddress = {
@@ -37,6 +38,15 @@ const Direccion = () => {
     event.preventDefault();
     if (!cart.length) {
       navigate("/carrito", { replace: true });
+      return;
+    }
+    if (!address.numeroCasa.trim()) {
+      Swal.fire({
+        icon: "error",
+        title: "Completa tu dirección",
+        text: "Debes indicar el número de casa o departamento para realizar el pedido.",
+        confirmButtonColor: "#7b2121",
+      });
       return;
     }
     if (!/^\d{7}$/.test(address.codigoPostal) || !/^\d{9}$/.test(address.numeroContacto)) {
@@ -81,12 +91,28 @@ const Direccion = () => {
             <label>Región<select name="region" value={address.region} onChange={updateField} required><option value="">Selecciona tu región</option>{regions.map(region => <option key={region}>{region}</option>)}</select></label>
             <label>Comuna<input name="comuna" value={address.comuna} onChange={updateField} maxLength="30" required /></label>
             <label className="shipping-wide">Dirección<input name="calle" value={address.calle} onChange={updateField} maxLength="60" required /></label>
-            <label><span>Casa/Depto. <small>(opcional)</small></span><input name="numeroCasa" value={address.numeroCasa} onChange={updateField} maxLength="20" placeholder="Número de casa/depto." /></label>
+            <label><span>Casa/Depto. <small>obligatorio</small></span><input name="numeroCasa" value={address.numeroCasa} onChange={updateField} maxLength="20" placeholder="Ej.: casa 671" required /></label>
             <label><span>Código postal <small>7 dígitos</small></span><input name="codigoPostal" inputMode="numeric" pattern="[0-9]{7}" value={address.codigoPostal} onChange={updateField} maxLength="7" placeholder="1234567" required /></label>
             <label><span>Teléfono <small>9 dígitos</small></span><input name="numeroContacto" inputMode="numeric" pattern="[0-9]{9}" value={address.numeroContacto} onChange={updateField} maxLength="9" placeholder="912345678" required /></label>
             <button className="wine-button wine-button-primary shipping-submit" type="submit" disabled={submitting}>{submitting ? "Confirmando compra…" : `Confirmar compra por ${formatPrice(total)}`}</button>
           </form>
-          <aside className="shipping-summary"><h2>Tu pedido</h2>{cart.map(item => <div key={item.id}><span>{item.cantidad} × {item.nombre}</span><strong>{formatPrice(item.precio * item.cantidad)}</strong></div>)}<div className="shipping-total"><span>Total</span><strong>{formatPrice(total)}</strong></div><p><i className="fa-solid fa-lock" /> Pago simulado. No almacenamos datos bancarios.</p></aside>
+          <aside className="shipping-summary">
+            <span className="shipping-summary-eyebrow">Resumen de compra</span>
+            <h2>Tu pedido</h2>
+            <div className="shipping-order-list">
+              {cart.map(item => (
+                <div className="shipping-order-item" key={item.id}>
+                  <div className="shipping-order-product">
+                    <span className="shipping-order-quantity">{item.cantidad} {item.cantidad === 1 ? "botella" : "botellas"}</span>
+                    <strong>{item.nombre}</strong>
+                  </div>
+                  <strong className="shipping-order-price">{formatPrice(item.precio * item.cantidad)}</strong>
+                </div>
+              ))}
+            </div>
+            <div className="shipping-total"><span>Total</span><strong>{formatPrice(total)}</strong></div>
+            <p><i className="fa-solid fa-lock" /> Pago simulado. No almacenamos datos bancarios.</p>
+          </aside>
         </div>
       </div>
     </main>

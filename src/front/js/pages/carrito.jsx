@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Context } from "../store/appContext.js";
 import { formatPrice } from "../component/Card.jsx";
 import "../../styles/filter.css";
@@ -7,7 +7,22 @@ import "../../styles/carrito.css";
 
 const Carrito = () => {
   const { store, actions } = useContext(Context);
+  const location = useLocation();
   const products = store.shoppingCart || [];
+
+  useEffect(() => {
+    if (location.hash !== "#productos-carrito" || !products.length) return;
+
+    const scrollToProducts = () => {
+      document.getElementById("productos-carrito")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    };
+
+    const animationFrame = window.requestAnimationFrame(scrollToProducts);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [location.hash, products.length]);
   const updateQuantity = (index, delta) => {
     const updated = products.map((product, position) => position === index
       ? { ...product, cantidad: Math.max(1, Math.min(product.stock || 99, product.cantidad + delta)) }
@@ -40,11 +55,16 @@ const Carrito = () => {
         <div className="cart-progress" aria-label="Progreso de compra"><span className="active"><i className="fa-solid fa-bag-shopping" /> Carrito</span><i className="fa-solid fa-chevron-right" /><span>Pago</span><i className="fa-solid fa-chevron-right" /><span>Confirmación</span></div>
       </header>
       <div className="cart-layout">
-        <section className="cart-items" aria-label="Productos del carrito">
+        <section id="productos-carrito" className="cart-items" aria-label="Productos del carrito">
           <div className="cart-items-heading"><div><h2>Tu selección</h2><span>{products.length} {products.length === 1 ? "etiqueta" : "etiquetas"}</span></div><Link to="/busqueda?q=">Añadir más vinos</Link></div>
           {products.map((product, index) => (
             <article className="cart-item" key={`${product.nombre}-${index}`}>
-              <div className="cart-item-image"><img src={product.image} alt={product.nombre} loading="lazy" decoding="async" /></div>
+              <div
+                className="cart-item-image"
+                role="img"
+                aria-label={product.nombre}
+                style={{ backgroundImage: `url("${product.image}")` }}
+              />
               <div className="cart-item-info"><span className="cart-item-kicker">El Rincón del Vino</span><h2>{product.nombre}</h2><div className="cart-item-tags"><span>{product.tipo}</span><span>{product.unitFormat || "750 ml"}</span></div><button className="cart-remove" onClick={() => remove(index)}><i className="fa-regular fa-trash-can" /> Eliminar</button></div>
               <div className="cart-item-actions"><span className="cart-quantity-label">Cantidad</span><div className="cart-quantity"><button onClick={() => updateQuantity(index, -1)} disabled={product.cantidad <= 1} aria-label="Reducir cantidad">−</button><span>{product.cantidad}</span><button onClick={() => updateQuantity(index, 1)} disabled={product.cantidad >= (product.stock || 99)} aria-label="Aumentar cantidad">+</button></div><small>{product.stock || 0} disponibles</small></div>
               <div className="cart-item-price"><small>{formatPrice(product.precio)} c/u</small><strong>{formatPrice(product.precio * product.cantidad)}</strong></div>
