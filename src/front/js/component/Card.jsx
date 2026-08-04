@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import "/src/front/styles/index.css";
 import { apiFetch } from "../services/api";
 import { Context } from "../store/appContext";

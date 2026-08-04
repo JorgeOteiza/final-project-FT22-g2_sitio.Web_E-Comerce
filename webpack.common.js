@@ -1,11 +1,20 @@
 const webpack = require('webpack');
 const path = require('path');
+const os = require('os');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   cache: {
-    type: 'filesystem'
+    type: 'filesystem',
+    cacheDirectory: path.join(
+      process.env.LOCALAPPDATA || os.tmpdir(),
+      'el-rincon-del-vino',
+      'webpack-cache'
+    ),
+    buildDependencies: {
+      config: [__filename]
+    }
   },
   entry: [
     './src/front/js/index.js'
@@ -40,7 +49,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['*', '.js']
+    extensions: ['.js', '.jsx', '.json']
   },
   plugins: [
     new HtmlWebpackPlugin({

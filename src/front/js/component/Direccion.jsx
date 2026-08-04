@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import { Context } from "../store/appContext";
 import { formatPrice } from "./Card.jsx";
 import "../../styles/cambiarDireccion.css";

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import { Context } from "../store/appContext.js";
 import { formatPrice } from "../component/Card.jsx";
 import favoriteIcon from "../../img/vino-add-favorites.png";

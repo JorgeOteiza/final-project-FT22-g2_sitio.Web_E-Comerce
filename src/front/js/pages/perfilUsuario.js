@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import { Context } from "../store/appContext";
 import { apiFetch } from "../services/api";
 import usuarioFoto from "../../img/usuario-perfil.webp";

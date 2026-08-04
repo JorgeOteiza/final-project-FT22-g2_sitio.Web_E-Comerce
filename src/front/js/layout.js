@@ -17,7 +17,6 @@ const PerfilUsuario = lazy(() => import("./pages/perfilUsuario.js"));
 const Single = lazy(() => import("./pages/single.js"));
 const Favoritos = lazy(() => import("./pages/favoritos.jsx"));
 const HistorialCompra = lazy(() => import("./pages/historialCompra.jsx"));
-const DetallesPedido = lazy(() => import("./pages/DetallesPedido.jsx"));
 const MetodoDePago = lazy(() => import("./pages/metodoDePago.jsx"));
 const MetodoDePagoRevisar = lazy(() => import("./pages/metodoDePagoRevisar.jsx"));
 const Direccion = lazy(() => import("./component/Direccion.jsx"));
@@ -72,11 +71,6 @@ const Layout = () => {
                                     <Favoritos />
                                 </PrivateRoute>
                             } path="/favoritos" />
-                            <Route element={
-                                <PrivateRoute>
-                                    <DetallesPedido />
-                                </PrivateRoute>
-                            } path="/detalles-pedido" />
                             <Route element={
                                 <PrivateRoute>
                                     <Direccion />

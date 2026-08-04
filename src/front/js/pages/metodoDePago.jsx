@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import { MetodoPagoContext } from "../component/ContextPago.jsx";
 import { Context } from "../store/appContext.js";
 import { formatPrice } from "../component/Card.jsx";

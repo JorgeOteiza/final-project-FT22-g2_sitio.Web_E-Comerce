@@ -1,10 +1,28 @@
 import React, { useState } from "react";
-import Cards from "react-credit-cards";
-import "react-credit-cards/es/styles-compiled.css";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 const { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } = require("./cardValidation.common.js");
 import "../../styles/pagoTarjetaDeCredito.css";
+
+const CardPreview = ({ card }) => {
+  const isBack = card.focus === "cvc";
+  return (
+    <div className={`demo-card ${isBack ? "demo-card-back" : ""}`} aria-label="Vista previa de la tarjeta">
+      {isBack ? (
+        <>
+          <div className="demo-card-stripe" />
+          <div className="demo-card-cvc"><span>CVC</span>{card.cvc || "•••"}</div>
+        </>
+      ) : (
+        <>
+          <div className="demo-card-top"><span className="demo-card-chip" /><i className="fa-solid fa-wifi" /></div>
+          <div className="demo-card-number">{card.number || "•••• •••• •••• ••••"}</div>
+          <div className="demo-card-details"><span><small>Titular</small>{card.name || "NOMBRE APELLIDO"}</span><span><small>Vence</small>{card.expiry || "MM/AA"}</span></div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const PagoTarjetaCredito = () => {
   const navigate = useNavigate();
@@ -25,7 +43,7 @@ const PagoTarjetaCredito = () => {
     if (!/^\d{3}$/.test(card.cvc)) return Swal.fire({ icon:"error", title:"CVC inválido", text:"Ingresa los 3 dígitos de seguridad.", confirmButtonColor:"#7b2121" });
     navigate("/metodo-de-pago/direccion");
   };
-  return <div className="card-payment-panel"><Cards number={onlyDigits(card.number)} name={card.name} expiry={onlyDigits(card.expiry)} cvc={card.cvc} focused={card.focus} /><form className="card-payment-form" onSubmit={submit}>
+  return <div className="card-payment-panel"><CardPreview card={card} /><form className="card-payment-form" onSubmit={submit}>
     <label>Número de tarjeta<div className="payment-input"><i className="fa-regular fa-credit-card" /><input name="number" value={card.number} onChange={update} onFocus={() => setCard(current => ({...current,focus:"number"}))} inputMode="numeric" placeholder="1234 5678 9012 3456" autoComplete="cc-number" required /></div><small className="payment-field-hint">Demo: usa 4242 4242 4242 4242. No ingreses una tarjeta real.</small></label>
     <label className="card-holder">Nombre del titular<div className="payment-input"><i className="fa-regular fa-user" /><input name="name" value={card.name} onChange={update} onFocus={() => setCard(current => ({...current,focus:"name"}))} placeholder="Nombre y apellido" autoComplete="cc-name" maxLength="40" required /></div></label>
     <label>Fecha de caducidad<div className="payment-input"><i className="fa-regular fa-calendar" /><input name="expiry" value={card.expiry} onChange={update} onFocus={() => setCard(current => ({...current,focus:"expiry"}))} inputMode="numeric" placeholder="MM/AA" autoComplete="cc-exp" maxLength="5" required /></div></label>

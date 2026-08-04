@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from "../services/alerts";
 import { Context } from "../store/appContext";
 import "../../styles/logIn.css";
 
