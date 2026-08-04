@@ -34,5 +34,7 @@ jobs:
           cache: npm
       - name: Instalar dependencias
         run: npm ci --legacy-peer-deps
+      - name: Ejecutar pruebas del frontend
+        run: npm run test:frontend
       - name: Compilar aplicación
         run: npm run build

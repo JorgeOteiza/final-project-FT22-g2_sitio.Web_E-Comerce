@@ -1,6 +1,6 @@
 const configuredBackendUrl = (process.env.BACKEND_URL || "").replace(/\/$/, "");
 
-export const API_URL = `${configuredBackendUrl}/api`;
+export const API_URL = configuredBackendUrl ? `${configuredBackendUrl}/api` : "/api";
 
 export const apiFetch = async (path, options = {}) => {
     const headers = new Headers(options.headers || {});
