@@ -113,16 +113,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
-			processPayment: async (_user_id, product_id) => {
-				try {
-				  await apiFetch("/historial-compra", {
-					method: 'POST',
-					body: JSON.stringify({ producto_id: product_id }),
-				  });
-				} catch (error) {
-				  console.error('Error procesando pago', error);
-				}
-			  },
 			//fetch de productos para la busqueda
 			getProduct: () => {
 
@@ -183,35 +173,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			setTipo: (tipo) => setStore({ tipo }),
 			setCategoria: (category) => setStore({ categoria: category }),
-
-			//fetch para restaurar contraseña
-
-			restaurar_contraseña: async (email) => {
-				try {
-					const response = await fetch(`https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/api/reset_password`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({ email: email }),
-					});
-
-					if (response.ok) {
-						const data = await response.json();
-						const token = data.token;
-						const resetUrl = `https://didactic-happiness-7qx694qjp792xjqj-3001.app.github.dev/reset_password/${token}`; // URL con el token
-
-					}
-					else {
-						throw new Error('Error al obtener el token');
-					}
-				}catch(error) {
-						console.error(error);
-					}
-
-				}
-		
-
 
 		}
 		}

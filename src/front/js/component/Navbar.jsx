@@ -4,7 +4,6 @@ import logoUrl from "../../img/logoElRinconDelVino.png";
 import LogIn from "./LogIn.jsx";
 import ModalContact from "./ModalContact.jsx";
 import RestaurarContraseña from "./ModalRestaurarContraseña.jsx";
-import ModalCerrarSesion from "./ModalCerrarSesion.jsx";
 import BarraDeBusqueda from "./BarraDeBusqueda.jsx";
 import { NavBarShoppingCart } from "./NavBarShoppingCart.jsx";
 
@@ -37,7 +36,6 @@ const Navbar = () => {
       <LogIn />
       <ModalContact />
       <RestaurarContraseña />
-      <ModalCerrarSesion />
       <nav className="navbar navbar-expand-lg wine-navbar" aria-label="Navegación principal">
         <div className="container-fluid wine-navbar-inner">
           <Link className="wine-navbar-brand" to="/" aria-label="Ir al inicio"><img src={logoUrl} alt="El Rincón del Vino" /></Link>

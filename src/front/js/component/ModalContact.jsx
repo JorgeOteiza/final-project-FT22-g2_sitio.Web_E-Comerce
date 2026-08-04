@@ -3,6 +3,10 @@ import emailjs from "@emailjs/browser";
 import contactImage from "../../img/barriles-concha-y-toro.webp";
 
 const initialForm = { name: "", lastName: "", email: "", phone: "", message: "" };
+const emailService = process.env.EMAILJS_SERVICE_ID;
+const emailTemplate = process.env.EMAILJS_TEMPLATE_ID;
+const emailPublicKey = process.env.EMAILJS_PUBLIC_KEY;
+const emailConfigured = [emailService, emailTemplate, emailPublicKey].every(value => value && value !== "MISSING_ENV_VAR");
 
 const ModalContact = () => {
   const [formData, setFormData] = useState(initialForm);
@@ -20,12 +24,15 @@ const ModalContact = () => {
     }
     setStatus("sending");
     try {
-      await emailjs.sendForm("service_n8cz62t", "template_i86ecfx", formRef.current, "kdu6P43r16fPHQoUu");
+      if (!emailConfigured) {
+        throw new Error("contact-not-configured");
+      }
+      await emailjs.sendForm(emailService, emailTemplate, formRef.current, emailPublicKey);
       setStatus("success");
       setFormData(initialForm);
-    } catch (_) {
+    } catch (error) {
       setStatus("idle");
-      setError("No pudimos enviar el mensaje. Inténtalo nuevamente en unos minutos.");
+      setError(error.message === "contact-not-configured" ? "El formulario no está habilitado en esta demostración. Puedes usar el correo indicado en esta ventana." : "No pudimos enviar el mensaje. Inténtalo nuevamente en unos minutos.");
     }
   };
 

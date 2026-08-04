@@ -1,16 +1,16 @@
-export const onlyDigits = value => value.replace(/\D/g, "");
+const onlyDigits = value => value.replace(/\D/g, "");
 
-export const formatCardNumber = value => onlyDigits(value)
+const formatCardNumber = value => onlyDigits(value)
   .slice(0, 16)
   .replace(/(.{4})/g, "$1 ")
   .trim();
 
-export const formatExpiry = value => {
+const formatExpiry = value => {
   const digits = onlyDigits(value).slice(0, 4);
   return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
 };
 
-export const isValidCardNumber = value => {
+const isValidCardNumber = value => {
   const digits = onlyDigits(value);
   if (digits.length !== 16) return false;
   let sum = 0;
@@ -27,7 +27,7 @@ export const isValidCardNumber = value => {
   return sum % 10 === 0;
 };
 
-export const isValidExpiry = value => {
+const isValidExpiry = value => {
   const [monthText, yearText] = value.split("/");
   if (!/^\d{2}$/.test(monthText || "") || !/^\d{2}$/.test(yearText || "")) return false;
   const month = Number(monthText);
@@ -36,3 +36,5 @@ export const isValidExpiry = value => {
   const now = new Date();
   return year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1);
 };
+
+module.exports = { onlyDigits, formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry };

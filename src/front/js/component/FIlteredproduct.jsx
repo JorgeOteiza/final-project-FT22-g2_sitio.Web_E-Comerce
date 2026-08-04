@@ -23,11 +23,12 @@ const Filteredproduct = () => {
   const urlOffers = searchParams.get("ofertas") === "1";
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({ query: urlQuery, type: urlType, grape: "", category: urlCategory, maxPrice: "", sort: "featured", offersOnly: urlOffers });
 
   useEffect(() => {
-    apiFetch("/productos").then(setProducts).catch(() => setProducts([])).finally(() => setLoading(false));
+    apiFetch("/productos").then(data => { setProducts(data); setLoadError(""); }).catch(() => { setProducts([]); setLoadError("No pudimos conectar con el catálogo."); }).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -83,7 +84,7 @@ const Filteredproduct = () => {
         <button className="wine-filter-clear" onClick={() => { clear(); setFiltersOpen(false); }}>Limpiar</button>
       </div>
       <div className="row g-4">
-        {loading ? Array.from({ length: 8 }).map((_, index) => <ProductCardSkeleton key={index} />) : filtered.length ? <Card productos={filtered} /> : <EmptyResults clear={clear} />}
+        {loading ? Array.from({ length: 8 }).map((_, index) => <ProductCardSkeleton key={index} />) : loadError ? <div className="wine-empty-state"><i className="fa-solid fa-plug-circle-xmark" /><h2>Catálogo temporalmente no disponible</h2><p>{loadError} Comprueba que el backend esté funcionando e inténtalo otra vez.</p><button className="wine-button wine-button-primary" onClick={() => window.location.reload()}>Reintentar</button></div> : filtered.length ? <Card productos={filtered} /> : <EmptyResults clear={clear} />}
       </div>
     </div>
   );

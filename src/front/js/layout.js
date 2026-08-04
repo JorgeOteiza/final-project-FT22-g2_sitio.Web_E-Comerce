@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
-import { BackendURL } from "./component/backendURL";
 
 import { Home } from "./pages/home";
 import injectContext from "./store/appContext";
@@ -18,7 +17,6 @@ const PerfilUsuario = lazy(() => import("./pages/perfilUsuario.js"));
 const Single = lazy(() => import("./pages/single.js"));
 const Favoritos = lazy(() => import("./pages/favoritos.jsx"));
 const HistorialCompra = lazy(() => import("./pages/historialCompra.jsx"));
-const ResetPassword = lazy(() => import("./pages/reset_password.jsx"));
 const DetallesPedido = lazy(() => import("./pages/DetallesPedido.jsx"));
 const MetodoDePago = lazy(() => import("./pages/metodoDePago.jsx"));
 const MetodoDePagoRevisar = lazy(() => import("./pages/metodoDePagoRevisar.jsx"));
@@ -29,8 +27,6 @@ const Layout = () => {
     //the basename is used when your project is published in a subdirectory and not in the root of the domain
     // you can set the basename on the .env file located at the root of this project, E.g: BASENAME=/react-hello-webapp/
     const basename = "/";
-
-    if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     return (
         <div>
@@ -87,14 +83,7 @@ const Layout = () => {
                                 </PrivateRoute>
                             } path="/metodo-de-pago/direccion" />
                             <Route element={<PrivateRoute><CompraExitosa /></PrivateRoute>} path="/compra-exitosa" />
-                            <Route element={<h1>Not found!</h1>} />
-
-
-                            <Route element={
-
-                                <ResetPassword />
-
-                            } path="/reset_password" />
+                            <Route element={<main className="wine-empty-state"><i className="fa-regular fa-compass" /><h1>Página no encontrada</h1><p>La dirección que buscas no existe o fue movida.</p><a className="wine-button wine-button-primary" href="/">Volver al inicio</a></main>} path="*" />
                         </Routes>
                         </Suspense>
                         <Footer />

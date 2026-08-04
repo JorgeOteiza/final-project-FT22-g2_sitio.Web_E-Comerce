@@ -8,8 +8,9 @@ const HistorialCompra = () => {
   const [history, setHistory] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   useEffect(() => {
-    apiFetch("/historial-compra").then(setHistory).catch(() => setHistory([])).finally(() => setLoading(false));
+    apiFetch("/historial-compra").then(data => { setHistory(data); setLoadError(""); }).catch(error => { setHistory([]); setLoadError(error.message); }).finally(() => setLoading(false));
   }, []);
   const filtered = useMemo(() => history.filter(item => item.producto?.nombre?.toLowerCase().includes(query.toLowerCase())), [history, query]);
 
@@ -17,7 +18,7 @@ const HistorialCompra = () => {
     <main className="history-page container">
       <header className="wine-catalog-header"><span className="wine-eyebrow wine-eyebrow-dark">Tu recorrido</span><h1>Historial de compras</h1><p>Consulta los vinos que has comprado anteriormente.</p></header>
       <label className="history-search"><i className="fa-solid fa-magnifying-glass" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar entre mis compras" /></label>
-      {loading ? <div className="history-list">{[1,2].map(item => <div className="history-card history-skeleton" key={item}><div className="wine-skeleton" /></div>)}</div> : filtered.length ? (
+      {loading ? <div className="history-list">{[1,2].map(item => <div className="history-card history-skeleton" key={item}><div className="wine-skeleton" /></div>)}</div> : loadError ? <div className="wine-empty-state"><i className="fa-solid fa-triangle-exclamation" /><h2>No pudimos cargar tus compras</h2><p>{loadError}</p><button className="wine-button wine-button-primary" onClick={() => window.location.reload()}>Reintentar</button></div> : filtered.length ? (
         <div className="history-list">{filtered.map((item, index) => {
           const product = item.producto;
           return <article className="history-card" key={item.id}>

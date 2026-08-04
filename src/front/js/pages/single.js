@@ -14,6 +14,7 @@ const Single = () => {
   const { id } = useParams();
   const product = store.product || {};
   const [quantity, setQuantity] = useState(1);
+  const [loadError, setLoadError] = useState("");
   const token = localStorage.getItem("token");
   const effectivePrice = product.precio_oferta || product.precio || 0;
   const inCart = store.shoppingCart?.some(item => item.id === product.id || item.nombre === product.nombre);
@@ -39,7 +40,8 @@ const Single = () => {
   }, [id]);
 
   useEffect(() => {
-    actions.fetchProduct(id);
+    setLoadError("");
+    actions.fetchProduct(id).catch(error => setLoadError(error.status === 404 ? "Este producto ya no está disponible." : "No pudimos cargar el producto. Inténtalo nuevamente."));
   }, [id]);
   useEffect(() => { setQuantity(1); }, [product.id]);
 
@@ -73,6 +75,7 @@ const Single = () => {
     Swal.fire({ toast:true, position:"top-end", timer:2500, showConfirmButton:false, icon:"success", title:`${product.nombre} agregado al carrito` });
   };
 
+  if (loadError) return <main className="single-page"><div className="wine-empty-state"><i className="fa-solid fa-wine-bottle" /><h1>Producto no disponible</h1><p>{loadError}</p><Link className="wine-button wine-button-primary" to="/busqueda?q=">Volver al catálogo</Link></div></main>;
   if (!product.id || String(product.id) !== String(id)) return <main className="single-page"><div className="single-loading"><div className="wine-skeleton single-loading-image" /><div><div className="wine-skeleton wine-skeleton-line" /><div className="wine-skeleton wine-skeleton-line medium" /></div></div></main>;
 
   return (

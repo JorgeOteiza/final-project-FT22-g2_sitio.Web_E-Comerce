@@ -9,7 +9,8 @@
 	"scripts": {
 		"dev": "webpack-dev-server --config webpack.dev.js --port 3000",
 		"start": "webpack-dev-server --config webpack.dev.js --port 3000",
-		"build": "webpack --config webpack.prod.js"
+		"build": "webpack --config webpack.prod.js",
+		"test:frontend": "node tests_frontend/cardValidation.test.cjs"
 	},
 	"author": "Equipo original del proyecto final de 4Geeks Academy",
 	"contributors": [

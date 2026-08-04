@@ -3,7 +3,7 @@ import Cards from "react-credit-cards";
 import "react-credit-cards/es/styles-compiled.css";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } from "./cardValidation";
+const { formatCardNumber, formatExpiry, isValidCardNumber, isValidExpiry, onlyDigits } = require("./cardValidation.common.js");
 import "../../styles/pagoTarjetaDeCredito.css";
 
 const PagoTarjetaCredito = () => {
